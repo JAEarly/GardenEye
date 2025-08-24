@@ -24,3 +24,5 @@ packages = ["src/app"]
 [tool.hatch.metadata]
 allow-direct-references = true
 
+[tool.mypy]
+disallow_untyped_defs = true

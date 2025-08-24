@@ -1,13 +1,13 @@
 from __future__ import annotations
 import os
-from typing import Optional, Tuple
 from fastapi import HTTPException, Request
 from starlette.responses import Response, StreamingResponse
+from collections.abc import Iterator
 
 CHUNK_SIZE = 1024 * 1024  # 1MB
 
 
-def _parse_range(range_header: str, file_size: int) -> Tuple[int, int]:
+def _parse_range(range_header: str, file_size: int) -> tuple[int, int]:
     """Parse a Range header into (start, end) byte positions inclusive.
     Supports formats like 'bytes=START-' or 'bytes=START-END' or 'bytes=-SUFFIX'.
     """
@@ -48,11 +48,11 @@ def range_file_response(file_path: str, request: Request) -> Response:
         raise HTTPException(status_code=404, detail="File not found")
 
     file_size = os.path.getsize(file_path)
-    range_header: Optional[str] = request.headers.get("range") or request.headers.get(
+    range_header: str | None = request.headers.get("range") or request.headers.get(
         "Range"
     )
 
-    def file_iterator(start: int, end: int):
+    def file_iterator(start: int, end: int) -> Iterator[bytes]:
         with open(file_path, "rb") as f:
             f.seek(start)
             bytes_left = end - start + 1
