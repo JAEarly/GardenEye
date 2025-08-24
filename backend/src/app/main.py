@@ -1,10 +1,13 @@
 from __future__ import annotations
+
 from pathlib import Path
 from urllib.parse import unquote
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse
-from typing import List
+from fastapi.responses import FileResponse
+from starlette.responses import Response
+
 from app.range_stream import range_file_response
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
@@ -24,7 +27,7 @@ app.add_middleware(
 
 
 @app.get("/")
-def index() -> HTMLResponse:
+def index() -> FileResponse:
     index_path = STATIC_ROOT / "index.html"
     print(index_path.absolute())
     if not index_path.is_file():
@@ -33,23 +36,25 @@ def index() -> HTMLResponse:
 
 
 @app.get("/api/videos")
-def list_videos() -> List[dict]:
+def list_videos() -> list[dict]:
     """Return a flat list of video files under MEDIA_ROOT (non-recursive by default)."""
     exts = {".mp4", ".mov", ".m4v", ".webm"}
     items = []
     for p in sorted(MEDIA_ROOT.glob("*")):
         if p.suffix.lower() in exts and p.is_file():
             rel = p.relative_to(MEDIA_ROOT)
-            items.append({
-                "name": p.name,
-                "path": str(rel).replace("\\", "/"),
-                "size": p.stat().st_size,
-            })
+            items.append(
+                {
+                    "name": p.name,
+                    "path": str(rel).replace("\\", "/"),
+                    "size": p.stat().st_size,
+                }
+            )
     return items
 
 
 @app.get("/stream")
-async def stream(request: Request, path: str):
+async def stream(request: Request, path: str) -> Response:
     """Stream a media file with Range support. The `path` is relative to MEDIA_ROOT."""
     # Security: prevent path traversal
     rel = Path(unquote(path))
