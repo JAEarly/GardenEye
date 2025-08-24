@@ -48,7 +48,9 @@ def range_file_response(file_path: str, request: Request) -> Response:
         raise HTTPException(status_code=404, detail="File not found")
 
     file_size = os.path.getsize(file_path)
-    range_header: Optional[str] = request.headers.get("range") or request.headers.get("Range")
+    range_header: Optional[str] = request.headers.get("range") or request.headers.get(
+        "Range"
+    )
 
     def file_iterator(start: int, end: int):
         with open(file_path, "rb") as f:

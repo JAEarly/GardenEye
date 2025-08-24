@@ -40,11 +40,13 @@ def list_videos() -> List[dict]:
     for p in sorted(MEDIA_ROOT.glob("*")):
         if p.suffix.lower() in exts and p.is_file():
             rel = p.relative_to(MEDIA_ROOT)
-            items.append({
-                "name": p.name,
-                "path": str(rel).replace("\\", "/"),
-                "size": p.stat().st_size,
-            })
+            items.append(
+                {
+                    "name": p.name,
+                    "path": str(rel).replace("\\", "/"),
+                    "size": p.stat().st_size,
+                }
+            )
     return items
 
 

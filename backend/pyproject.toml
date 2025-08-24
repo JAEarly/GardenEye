@@ -8,6 +8,12 @@ dependencies = [
     "uvicorn>=0.35.0",
 ]
 
+[dependency-groups]
+dev = [
+    "mypy>=1.17.1",
+    "ruff>=0.12.10",
+]
+
 [build-system]
 requires = ["hatchling>=1.21"]
 build-backend = "hatchling.build"
@@ -17,3 +23,4 @@ packages = ["src/app"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
+
