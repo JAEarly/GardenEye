@@ -1,8 +1,10 @@
 from __future__ import annotations
+
 import os
+from collections.abc import Iterator
+
 from fastapi import HTTPException, Request
 from starlette.responses import Response, StreamingResponse
-from collections.abc import Iterator
 
 CHUNK_SIZE = 1024 * 1024  # 1MB
 

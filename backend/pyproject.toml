@@ -26,3 +26,7 @@ allow-direct-references = true
 
 [tool.mypy]
 disallow_untyped_defs = true
+
+[tool.ruff]
+# Enable the "isort" rules for import ordering
+lint.select = ["I"]

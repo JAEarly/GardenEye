@@ -1,11 +1,14 @@
 from __future__ import annotations
+
 from pathlib import Path
 from urllib.parse import unquote
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from app.range_stream import range_file_response
 from starlette.responses import Response
+
+from app.range_stream import range_file_response
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 MEDIA_ROOT = (BASE_DIR / "data" / "25_10_08").resolve()
