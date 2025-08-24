@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GardenEye</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; background: #0b0c10; color: #e6e6e6; }
+    header { padding: 16px 20px; border-bottom: 1px solid #1f2328; position: sticky; top: 0; background: #0b0c10; }
+    main { padding: 20px; max-width: 960px; margin: 0 auto; }
+    .row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    select { padding: 8px 12px; border-radius: 10px; border: 1px solid #30363d; background: #111217; color: #e6e6e6; }
+    video { width: 100%; max-height: 70vh; border-radius: 14px; border: 1px solid #30363d; background: #000; }
+    small { opacity: .7 }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="row">
+      <strong>GardenEye</strong>
+      <small id="meta"></small>
+    </div>
+  </header>
+  <main>
+    <div class="row" style="margin-bottom: 12px;">
+      <label for="videos">Choose a file:</label>
+      <select id="videos"></select>
+    </div>
+    <video id="player" controls preload="metadata"></video>
+  </main>
+  <script>
+    async function init() {
+      const res = await fetch('/api/videos');
+      const files = await res.json();
+      const sel = document.getElementById('videos');
+      const meta = document.getElementById('meta');
+      const player = document.getElementById('player');
+      sel.innerHTML = '';
+      if (!files.length) {
+        sel.innerHTML = '<option>(Put .mp4 files in ./media)</option>';
+        meta.textContent = '';
+        return;
+      }
+      for (const f of files) {
+        const opt = document.createElement('option');
+        opt.value = f.path; opt.textContent = `${f.name}`; sel.appendChild(opt);
+      }
+      function playCurrent() {
+        const p = sel.value;
+        player.src = `/stream?path=${encodeURIComponent(p)}`;
+        const f = files.find(x => x.path === p);
+        meta.textContent = f ? `• ${f.name} • ${(f.size/1048576).toFixed(1)} MB` : '';
+      }
+      sel.addEventListener('change', playCurrent);
+      playCurrent();
+    }
+    init().catch(console.error);
+  </script>
+</body>
+</html>
