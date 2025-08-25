@@ -8,11 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from starlette.responses import Response
 
+from app import MEDIA_ROOT, STATIC_ROOT
 from app.range_stream import range_file_response
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
-MEDIA_ROOT = (BASE_DIR / "data" / "25_10_08").resolve()
-STATIC_ROOT = (BASE_DIR / "frontend" / "static").resolve()
 
 app = FastAPI(title="GardenEye", version="0.1.0")
 
