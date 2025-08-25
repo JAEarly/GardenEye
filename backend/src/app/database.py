@@ -5,19 +5,20 @@ from typing import Final
 from peewee import CharField, FloatField, IntegerField, Model, SqliteDatabase
 
 from app import DATA_DIR, DATABASE_PATH
+from app.log import get_logger
 
-# Config
+logger = get_logger(__name__)
+
 DB: Final[SqliteDatabase] = SqliteDatabase(DATABASE_PATH)
-DATA_ROOT: Final[Path] = DATA_DIR
 
 
 class PathField(CharField):
     def db_value(self, path: Path) -> str:
-        rel_path = path.relative_to(DATA_ROOT)
+        rel_path = path.relative_to(DATA_DIR)
         return os.fspath(rel_path)
 
     def python_value(self, str_path: str) -> Path:
-        return DATA_ROOT / str_path
+        return Path(str_path)
 
 
 class VideoFile(Model):
@@ -30,19 +31,16 @@ class VideoFile(Model):
 
 
 def init_database() -> SqliteDatabase:
+    logger.info(f"Initialising database from {DATABASE_PATH}")
     DB.connect()
     DB.create_tables([VideoFile])
     return DB
 
 
 def add_files() -> None:
+    logger.info("Adding files...")
     data = []
-    for path in DATA_ROOT.glob("**/*.MP4"):
+    for path in DATA_DIR.glob("**/*.MP4"):
         st = path.stat()
         data.append({"path": path, "size": st.st_size, "modified": st.st_mtime})
     (VideoFile.insert_many(data).on_conflict_ignore().execute())
-
-
-if __name__ == "__main__":
-    init_database()
-    add_files()
