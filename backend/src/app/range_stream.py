@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from collections.abc import Iterator
+from pathlib import Path
 
 from fastapi import HTTPException, Request
 from starlette.responses import Response, StreamingResponse
@@ -44,9 +45,9 @@ def _parse_range(range_header: str, file_size: int) -> tuple[int, int]:
     return start, end
 
 
-def range_file_response(file_path: str, request: Request) -> Response:
+def range_file_response(file_path: Path, request: Request) -> Response:
     """Return a Response supporting HTTP Range requests for video playback."""
-    if not os.path.isfile(file_path):
+    if not file_path.is_file():
         raise HTTPException(status_code=404, detail="File not found")
 
     file_size = os.path.getsize(file_path)

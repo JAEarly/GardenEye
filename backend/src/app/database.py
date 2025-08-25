@@ -14,8 +14,7 @@ DB: Final[SqliteDatabase] = SqliteDatabase(DATABASE_PATH)
 
 class PathField(CharField):
     def db_value(self, path: Path) -> str:
-        rel_path = path.relative_to(DATA_DIR)
-        return os.fspath(rel_path)
+        return os.fspath(path)
 
     def python_value(self, str_path: str) -> Path:
         return Path(str_path)

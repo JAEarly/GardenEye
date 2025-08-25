@@ -31,8 +31,8 @@ async def lifespan(app_: FastAPI) -> AsyncGenerator[None, Any]:
 
 
 class VideoOut(BaseModel):
+    vid: int
     name: str
-    path: str
     size: int
     modified: float | None = None
 
@@ -66,8 +66,8 @@ def list_videos() -> list[VideoOut]:
     for vf in VideoFile.select().order_by(VideoFile.path):
         items.append(
             VideoOut(
+                vid=vf.id,
                 name=vf.path.name,
-                path=os.fspath(vf.path),
                 size=int(vf.size),
             )
         )
@@ -75,16 +75,7 @@ def list_videos() -> list[VideoOut]:
 
 
 @app.get("/stream")
-async def stream(request: Request, path: str) -> Response:
-    """Stream a media file with Range support. The `path` is relative to MEDIA_ROOT."""
-    # Security: prevent path traversal
-    rel = Path(unquote(path))
-    if rel.is_absolute() or ".." in rel.parts:
-        raise HTTPException(status_code=400, detail="Invalid path")
-
-    full_path = (DATA_DIR / rel).resolve()
-    if not str(full_path).startswith(str(DATA_DIR)):
-        raise HTTPException(status_code=403, detail="Forbidden")
-
-    # Always serve as mp4 (browser-friendly). If source isn't mp4, convert offline first.
-    return range_file_response(str(full_path), request)
+async def stream(request: Request, vid: int) -> Response:
+    """Stream a media file with Range support."""
+    vf = VideoFile.get_by_id(vid)
+    return range_file_response(vf.path, request)

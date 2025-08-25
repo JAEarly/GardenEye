@@ -43,12 +43,12 @@
       }
       for (const f of files) {
         const opt = document.createElement('option');
-        opt.value = f.path; opt.textContent = `${f.name}`; sel.appendChild(opt);
+        opt.value = f.vid; opt.textContent = `${f.name}`; sel.appendChild(opt);
       }
       function playCurrent() {
-        const p = sel.value;
-        player.src = `/stream?path=${encodeURIComponent(p)}`;
-        const f = files.find(x => x.path === p);
+        const v = sel.value;
+        player.src = `/stream?vid=${v}`;
+        const f = files.find(x => x.vid === v);
         meta.textContent = f ? `• ${f.name} • ${(f.size/1048576).toFixed(1)} MB` : '';
       }
       sel.addEventListener('change', playCurrent);
