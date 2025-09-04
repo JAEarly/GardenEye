@@ -7,6 +7,7 @@ from typing import Any, Literal
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from starlette.responses import Response
 
@@ -32,6 +33,7 @@ class VideoOut(BaseModel):
     vid: int
     name: str
     size: int
+    movement: float
     modified: float | None = None
 
 
@@ -46,6 +48,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files directory
+app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
 
 
 @app.get("/")
@@ -67,6 +72,7 @@ def list_videos() -> list[VideoOut]:
                 vid=vf.id,
                 name=vf.path.name,
                 size=int(vf.size),
+                movement=vf.movement,
             )
         )
     return items
