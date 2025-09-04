@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, AsyncGenerator
+from typing import Any, AsyncGenerator, Literal
 from urllib.parse import unquote
 
 from fastapi import FastAPI, HTTPException, Request
@@ -63,7 +63,7 @@ def list_videos() -> list[VideoOut]:
     """Return a flat list of video files from the database."""
     items: list[VideoOut] = []
     # Query the DB and order by path for stable output
-    for vf in VideoFile.select().order_by(VideoFile.path):
+    for vf in VideoFile.select().order_by(VideoFile.movement.desc()):
         items.append(
             VideoOut(
                 vid=vf.id,
@@ -75,7 +75,16 @@ def list_videos() -> list[VideoOut]:
 
 
 @app.get("/stream")
-async def stream(request: Request, vid: int) -> Response:
+async def stream(
+    request: Request, vid: int, mode: Literal["normal", "movement"]
+) -> Response:
     """Stream a media file with Range support."""
     vf = VideoFile.get_by_id(vid)
-    return range_file_response(vf.path, request)
+    match mode:
+        case "normal":
+            path = vf.path
+        case "movement":
+            path = vf.path.with_stem(vf.path.stem + "_movement").with_suffix(".mp4")
+        case _:
+            raise HTTPException(status_code=400, detail=f"Invalid mode: {mode}")
+    return range_file_response(path, request)

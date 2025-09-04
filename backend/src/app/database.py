@@ -24,6 +24,8 @@ class VideoFile(Model):
     path = PathField(unique=True)  # Path
     size = IntegerField()  # Size in bytes
     modified = FloatField()  # Modification time in seconds
+    # Score between 0 (no movement) and 1 (maximum movement). -1 indicates not computed.
+    movement = FloatField(default=-1)
 
     class Meta:
         database = DB
@@ -40,6 +42,8 @@ def add_files() -> None:
     logger.info("Adding files...")
     data = []
     for path in DATA_DIR.glob("**/*.MP4"):
+        if "_movement" in path.stem:
+            continue
         st = path.stat()
         data.append({"path": path, "size": st.st_size, "modified": st.st_mtime})
-    (VideoFile.insert_many(data).on_conflict_ignore().execute())
+    VideoFile.insert_many(data).on_conflict_ignore().execute()

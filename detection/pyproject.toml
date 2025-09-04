@@ -3,13 +3,23 @@ name = "garden-eye-detection"
 version = "0.1.0"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "garden-eye",
+    "matplotlib>=3.10.6",
+    "numpy>=2.2.6",
+    "opencv-python>=4.11.0.86",
+    "tqdm>=4.67.1",
+]
 
 [dependency-groups]
 dev = [
     "mypy>=1.17.1",
     "ruff>=0.12.10",
+    "types-tqdm>=4.67.0.20250809",
 ]
+
+[tool.uv.sources]
+garden-eye = { path = "../backend", editable = true }
 
 [build-system]
 requires = ["hatchling>=1.21"]

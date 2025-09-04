@@ -18,15 +18,16 @@
   <header>
     <div class="row">
       <strong>GardenEye</strong>
-      <small id="meta"></small>
     </div>
   </header>
   <main>
     <div class="row" style="margin-bottom: 12px;">
       <label for="videos">Choose a file:</label>
       <select id="videos"></select>
+      <select id="mode"></select>
+      <small id="meta"></small>
     </div>
-    <video id="player" controls preload="metadata"></video>
+    <video id="player" controls preload="auto"></video>
   </main>
   <script>
     async function init() {
@@ -34,6 +35,9 @@
       const files = await res.json();
       const sel = document.getElementById('videos');
       const meta = document.getElementById('meta');
+      const mode = document.getElementById('mode');
+      opt = document.createElement('option'); opt.textContent = "Normal"; mode.appendChild(opt);
+      opt = document.createElement('option'); opt.textContent = "Movement"; mode.appendChild(opt);
       const player = document.getElementById('player');
       sel.innerHTML = '';
       if (!files.length) {
@@ -47,11 +51,16 @@
       }
       function playCurrent() {
         const v = sel.value;
-        player.src = `/stream?vid=${v}`;
-        const f = files.find(x => x.vid === v);
-        meta.textContent = f ? `• ${f.name} • ${(f.size/1048576).toFixed(1)} MB` : '';
+        const prev_time = player.currentTime;
+        const paused = player.paused;
+        player.src = `/stream?vid=${v}&mode=${mode.value.toLowerCase()}`;
+        player.currentTime = prev_time;
+        player.paused = paused;
+        const f = files.find(x => x.vid == v);
+        meta.textContent = f ? `${(f.size/1048576).toFixed(1)} MB` : '';
       }
       sel.addEventListener('change', playCurrent);
+      mode.addEventListener('change', playCurrent);
       playCurrent();
     }
     init().catch(console.error);
