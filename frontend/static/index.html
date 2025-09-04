@@ -13,12 +13,20 @@
     </div>
   </header>
   <main>
-    <div class="row" style="margin-bottom: 12px;">
-      <label for="videos">Choose a file:</label>
-      <select id="videos"></select>
+    <div class="controls">
+      <div class="view-toggle">
+        <button id="table-view-btn" class="active">📋 Table</button>
+        <button id="grid-view-btn">🔳 Grid</button>
+      </div>
+      
+      <input type="text" id="search" placeholder="Search videos..." />
+      
+      <label for="mode">Mode:</label>
       <select id="mode"></select>
-      <small id="meta"></small>
     </div>
+    
+    <div id="file-list"></div>
+    
     <video id="player" controls preload="auto"></video>
   </main>
   <script src="/static/app.js"></script>

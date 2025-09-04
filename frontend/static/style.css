@@ -15,7 +15,7 @@ header {
 
 main {
   padding: 20px;
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -26,9 +26,56 @@ main {
   flex-wrap: wrap;
 }
 
+.controls {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.view-toggle button {
+  padding: 8px 12px;
+  border: none;
+  background: #111217;
+  color: #e6e6e6;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.view-toggle button:hover {
+  background: #21262d;
+}
+
+.view-toggle button.active {
+  background: #238636;
+}
+
+input[type="text"] {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #30363d;
+  background: #111217;
+  color: #e6e6e6;
+  min-width: 200px;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: #238636;
+}
+
 select {
   padding: 8px 12px;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid #30363d;
   background: #111217;
   color: #e6e6e6;
@@ -40,6 +87,149 @@ video {
   border-radius: 14px;
   border: 1px solid #30363d;
   background: #000;
+}
+
+/* Table View Styles */
+.table-view {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.table-view th,
+.table-view td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #1f2328;
+}
+
+.table-view th {
+  background: #111217;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+.table-view th:hover {
+  background: #21262d;
+}
+
+.table-view th.sortable::after {
+  content: '↕️';
+  position: absolute;
+  right: 8px;
+  opacity: 0.5;
+}
+
+.table-view th.asc::after {
+  content: '↑';
+  opacity: 1;
+}
+
+.table-view th.desc::after {
+  content: '↓';
+  opacity: 1;
+}
+
+.table-view tbody tr {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.table-view tbody tr:hover {
+  background: #111217;
+}
+
+.table-view tbody tr.selected {
+  background: #1a2332;
+}
+
+.movement-score {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.movement-high {
+  background: #da3633;
+  color: #fff;
+}
+
+.movement-medium {
+  background: #fb8500;
+  color: #fff;
+}
+
+.movement-low {
+  background: #238636;
+  color: #fff;
+}
+
+.movement-none {
+  background: #6e7681;
+  color: #fff;
+}
+
+/* Grid View Styles */
+.grid-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.video-card {
+  background: #111217;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.video-card:hover {
+  background: #21262d;
+  border-color: #4d5a6e;
+  transform: translateY(-2px);
+}
+
+.video-card.selected {
+  border-color: #238636;
+  background: #1a2332;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.card-title {
+  font-weight: 600;
+  font-size: 1.1em;
+  margin: 0;
+  word-break: break-word;
+}
+
+.card-meta {
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.card-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hidden {
+  display: none;
 }
 
 small {
