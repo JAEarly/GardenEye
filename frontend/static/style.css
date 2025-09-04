@@ -13,6 +13,25 @@ header {
   background: #0b0c10;
 }
 
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+.wordmark {
+  height: 24px;
+  width: auto;
+}
+
 main {
   padding: 20px;
   max-width: 1200px;
