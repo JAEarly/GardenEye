@@ -33,6 +33,7 @@ class VideoOut(BaseModel):
     vid: int
     name: str
     size: int
+    movement: float
     modified: float | None = None
 
 
@@ -71,6 +72,7 @@ def list_videos() -> list[VideoOut]:
                 vid=vf.id,
                 name=vf.path.name,
                 size=int(vf.size),
+                movement=vf.movement,
             )
         )
     return items
