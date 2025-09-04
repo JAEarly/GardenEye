@@ -33,7 +33,7 @@ jobs:
         with:
           just-version: '1.26.0'
       - name: Install python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version-file: ${{ matrix.project }}/.python-version
       - name: Install uv
@@ -65,7 +65,7 @@ jobs:
         with:
           just-version: '1.26.0'
       - name: Install python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version-file: ${{ matrix.project }}/.python-version
       - name: Install uv
