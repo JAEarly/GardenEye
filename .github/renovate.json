@@ -1,0 +1,29 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:base"],
+  "schedule": ["before 6am on monday"],
+  "timezone": "UTC",
+  "labels": ["dependencies"],
+  "assignees": [],
+  "reviewers": [],
+  "packageRules": [
+    {
+      "matchManagers": ["python"],
+      "matchFiles": ["**/pyproject.toml"],
+      "groupName": "Python dependencies"
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "groupName": "Development dependencies",
+      "schedule": ["before 6am on monday"]
+    },
+    {
+      "matchPackagePatterns": ["^ruff", "^mypy", "^pytest"],
+      "groupName": "Linting and testing tools"
+    }
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on monday"]
+  }
+}
