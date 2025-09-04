@@ -1,7 +1,21 @@
+# Default recipe: run everything
+default: fmt lint test clean
+
+# Format code
 fmt:
     uv run ruff format .
     uv run ruff check --fix .
 
+# Lint (no fixing)
 lint:
     uv run ruff check .
     uv run mypy .
+
+# Run tests with coverage reports
+test:
+    uv run pytest --cov-report=html --cov-report=term
+
+# Clean build and cache artifacts
+clean:
+    rm -rf htmlcov/ .coverage
+    find . -name "*.pyc" -o -name "__pycache__" -exec rm -rf {} +

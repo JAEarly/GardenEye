@@ -16,8 +16,8 @@ def _parse_range(range_header: str, file_size: int) -> tuple[int, int]:
     """
     try:
         units, ranges = range_header.split("=", 1)
-    except ValueError:
-        raise HTTPException(status_code=416, detail="Invalid Range header")
+    except ValueError as e:
+        raise HTTPException(status_code=416, detail="Invalid Range header") from e
 
     if units.strip() != "bytes":
         raise HTTPException(status_code=416, detail="Only 'bytes' range supported")
@@ -51,9 +51,7 @@ def range_file_response(file_path: Path, request: Request) -> Response:
         raise HTTPException(status_code=404, detail="File not found")
 
     file_size = os.path.getsize(file_path)
-    range_header: str | None = request.headers.get("range") or request.headers.get(
-        "Range"
-    )
+    range_header: str | None = request.headers.get("range") or request.headers.get("Range")
 
     def file_iterator(start: int, end: int) -> Iterator[bytes]:
         with open(file_path, "rb") as f:
