@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import os
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from pathlib import Path
-from typing import Any, AsyncGenerator, Literal
-from urllib.parse import unquote
+from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,8 +10,8 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from starlette.responses import Response
 
-from app import DATA_DIR, STATIC_ROOT
-from app.database import DB, VideoFile, add_files, init_database
+from app import STATIC_ROOT
+from app.database import VideoFile, add_files, init_database
 from app.log import get_logger
 from app.range_stream import range_file_response
 
@@ -24,10 +22,10 @@ for name in ["uvicorn", "uvicorn.error", "uvicorn.access"]:
 
 @asynccontextmanager
 async def lifespan(app_: FastAPI) -> AsyncGenerator[None, Any]:
-    init_database()
+    db = init_database()
     add_files()
     yield
-    DB.close()
+    db.close()
 
 
 class VideoOut(BaseModel):
@@ -75,9 +73,7 @@ def list_videos() -> list[VideoOut]:
 
 
 @app.get("/stream")
-async def stream(
-    request: Request, vid: int, mode: Literal["normal", "movement"]
-) -> Response:
+async def stream(request: Request, vid: int, mode: Literal["normal", "movement"]) -> Response:
     """Stream a media file with Range support."""
     vf = VideoFile.get_by_id(vid)
     match mode:

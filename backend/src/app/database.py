@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from typing import Final
 
 from peewee import CharField, FloatField, IntegerField, Model, SqliteDatabase
 
@@ -8,8 +7,6 @@ from app import DATA_DIR, DATABASE_PATH
 from app.log import get_logger
 
 logger = get_logger(__name__)
-
-DB: Final[SqliteDatabase] = SqliteDatabase(DATABASE_PATH)
 
 
 class PathField(CharField):
@@ -27,21 +24,20 @@ class VideoFile(Model):
     # Score between 0 (no movement) and 1 (maximum movement). -1 indicates not computed.
     movement = FloatField(default=-1)
 
-    class Meta:
-        database = DB
+
+def init_database(db_path: Path = DATABASE_PATH) -> SqliteDatabase:
+    logger.info(f"Initialising database with {db_path=}")
+    db = SqliteDatabase(db_path)
+    db.connect()
+    db.bind([VideoFile])
+    db.create_tables([VideoFile])
+    return db
 
 
-def init_database() -> SqliteDatabase:
-    logger.info(f"Initialising database from {DATABASE_PATH}")
-    DB.connect()
-    DB.create_tables([VideoFile])
-    return DB
-
-
-def add_files() -> None:
+def add_files(video_dir: Path = DATA_DIR) -> None:
     logger.info("Adding files...")
     data = []
-    for path in DATA_DIR.glob("**/*.MP4"):
+    for path in video_dir.glob("**/*.MP4"):
         if "_movement" in path.stem:
             continue
         st = path.stat()
