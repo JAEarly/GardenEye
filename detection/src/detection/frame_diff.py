@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
@@ -12,9 +13,7 @@ from tqdm import tqdm
 def run() -> None:
     init_database()
     add_files()
-    for vf in tqdm(
-        VideoFile.select().order_by(VideoFile.path), desc="Computing movement scores..."
-    ):
+    for vf in tqdm(VideoFile.select().order_by(VideoFile.path), desc="Computing movement scores..."):
         if vf.movement == -1:
             vf.movement = compute_movement_score(vf.path)
             vf.save()
@@ -63,9 +62,12 @@ def compute_movement_score(path: Path) -> float:
     cap.release()
     out.release()
 
+    ffmpeg_path = shutil.which("ffmpeg")
+    if not ffmpeg_path:
+        raise RuntimeError("ffmpeg not found in PATH")
+
     subprocess.run(
-        f"ffmpeg -i {tmp_path} -vcodec libx264 -f mp4 {output_path} -loglevel error",
-        shell=True,
+        [ffmpeg_path, "-i", str(tmp_path), "-vcodec", "libx264", "-f", "mp4", str(output_path), "-loglevel", "error"]
     )
 
     return float(np.mean(frame_scores))

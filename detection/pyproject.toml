@@ -16,6 +16,8 @@ dev = [
     "mypy>=1.17.1",
     "ruff>=0.12.10",
     "types-tqdm>=4.67.0.20250809",
+    "pytest>=8.0.0",
+    "pytest-cov>=6.0.0",
 ]
 
 [tool.uv.sources]
@@ -36,4 +38,35 @@ disallow_untyped_defs = true
 disallow_any_generics = true
 
 [tool.ruff]
-lint.select = ["I"]
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "S",   # bandit security
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+]
+ignore = [
+    "S101",  # assert (OK in tests)
+    "S603",  # subprocess call (needed for ffmpeg)
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = [
+    "--strict-markers",
+    "--cov=src",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["*/tests/*"]
