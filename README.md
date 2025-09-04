@@ -1,5 +1,11 @@
 
-# GardenEye 
+<div align="center">
+  <img src="frontend/static/images/logo.png" alt="GardenEye Logo" width="80" />
+  <br/>
+  <img src="frontend/static/images/wordmark.png" alt="GardenEye" height="40" />
+</div>
+
+<br/>
 
 A wildlife camera web viewer that processes videos to detect and visualize movement, perfect for monitoring garden wildlife.
 
