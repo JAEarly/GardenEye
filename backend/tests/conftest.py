@@ -9,7 +9,7 @@ from app.database import init_database
 
 
 @pytest.fixture
-def test_db(tmp_path: Path) -> Generator[SqliteDatabase, None, None]:
+def test_db(tmp_path: Path) -> Generator[SqliteDatabase]:
     """Create an in-memory test database."""
     # Create a temporary database file for testing
     test_db_path = tmp_path / "test.db"
@@ -24,7 +24,7 @@ def test_db(tmp_path: Path) -> Generator[SqliteDatabase, None, None]:
 
 
 @pytest.fixture
-def temp_video_dir() -> Generator[Path, None, None]:
+def temp_video_dir() -> Generator[Path]:
     """Create a temporary directory for test video files."""
     with tempfile.TemporaryDirectory() as temp_dir:
         yield Path(temp_dir)
