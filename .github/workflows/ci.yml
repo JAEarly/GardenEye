@@ -78,9 +78,3 @@ jobs:
         run: uv sync --locked --all-extras --dev
       - name: Run tests
         run: just test
-      - name: Upload coverage
-        uses: codecov/codecov-action@v4
-        with:
-          working-directory: ${{ matrix.project }}
-          file: ./.coverage
-          fail_ci_if_error: false
