@@ -19,3 +19,4 @@ test:
 clean:
     rm -rf htmlcov/ .coverage
     find . -name "*.pyc" -o -name "__pycache__" -exec rm -rf {} +
+    uvx creosote

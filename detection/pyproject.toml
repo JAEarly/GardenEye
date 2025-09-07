@@ -75,3 +75,6 @@ addopts = [
 [tool.coverage.run]
 source = ["src"]
 omit = ["*/tests/*"]
+
+[tool.creosote]
+exclude-deps = ["garden-eye"]
