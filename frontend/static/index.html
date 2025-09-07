@@ -21,24 +21,18 @@
   </header>
   <main>
     <div class="controls">
-      <div class="view-toggle">
-        <button id="table-view-btn" class="active">📋 Table</button>
-        <button id="grid-view-btn">🔳 Grid</button>
-      </div>
-      
       <input type="text" id="search" placeholder="Search videos..." />
       
       <label for="annotations">
         <input type="checkbox" id="annotations" checked> Annotations
       </label>
+      
+      <select id="class-filter">
+        <option value="">All Objects</option>
+      </select>
     </div>
     
     <div id="file-list"></div>
-    
-    <div class="video-container">
-      <video id="player" controls preload="auto"></video>
-      <canvas id="annotation-overlay"></canvas>
-    </div>
   </main>
   <script src="/static/app.js"></script>
 </body>
