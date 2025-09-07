@@ -180,34 +180,6 @@ video {
   background: #1a2332;
 }
 
-.movement-score {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.85em;
-  font-weight: 500;
-}
-
-.movement-high {
-  background: #da3633;
-  color: #fff;
-}
-
-.movement-medium {
-  background: #fb8500;
-  color: #fff;
-}
-
-.movement-low {
-  background: #238636;
-  color: #fff;
-}
-
-.movement-none {
-  background: #6e7681;
-  color: #fff;
-}
-
 /* Grid View Styles */
 .grid-view {
   display: grid;

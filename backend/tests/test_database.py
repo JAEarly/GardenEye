@@ -24,12 +24,11 @@ def test__path_field__converts_between_path_and_string() -> None:
 
 def test__video_file__creates_record(test_db: SqliteDatabase, sample_video_file: Path) -> None:
     """Test creating VideoFile records."""
-    video = VideoFile.create(path=sample_video_file, size=1024, modified=1234567890.0, movement=0.75)
+    video = VideoFile.create(path=sample_video_file, size=1024, modified=1234567890.0)
 
     assert video.path == sample_video_file
     assert video.size == 1024
     assert video.modified == 1234567890.0
-    assert video.movement == 0.75
 
 
 def test__video_file__enforces_unique_path(test_db: SqliteDatabase, sample_video_file: Path) -> None:
@@ -39,13 +38,6 @@ def test__video_file__enforces_unique_path(test_db: SqliteDatabase, sample_video
     # Should raise IntegrityError on duplicate path
     with pytest.raises(IntegrityError):
         VideoFile.create(path=sample_video_file, size=2048, modified=1234567891.0)
-
-
-def test__video_file__defaults_movement_to_negative_one(test_db: SqliteDatabase, sample_video_file: Path) -> None:
-    """Test default movement score is -1."""
-    video = VideoFile.create(path=sample_video_file, size=1024, modified=1234567890.0)
-
-    assert video.movement == -1
 
 
 def test__init_database__creates_tables() -> None:
@@ -71,23 +63,20 @@ def test__add_files__adds_video_files(test_db: SqliteDatabase, tmp_path: Path) -
 
     video1 = video_dir / "video1.MP4"
     video2 = video_dir / "video2.MP4"
-    movement_video = video_dir / "video1_movement.MP4"  # Should be ignored
 
     video1.write_bytes(b"fake video 1 content")
     video2.write_bytes(b"fake video 2 content")
-    movement_video.write_bytes(b"movement video content")
 
     # Call add_files with the video directory
     add_files(video_dir)
 
-    # Check that only non-movement videos were added
+    # Check that  videos were added
     videos = list(VideoFile.select())
     assert len(videos) == 2
 
     video_names = {v.path.name for v in videos}
     assert "video1.MP4" in video_names
     assert "video2.MP4" in video_names
-    assert "video1_movement.MP4" not in video_names
 
 
 def test__add_files__skips_existing_files(test_db: SqliteDatabase, tmp_path: Path) -> None:

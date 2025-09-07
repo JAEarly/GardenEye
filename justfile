@@ -41,7 +41,7 @@ install:
     cd detection && uv sync --locked --all-extras --dev
 
 # Run development server
-dev:
+run:
     @echo "Starting development server..."
     cd backend && uv run python -m uvicorn app.main:app --reload \
       --reload-dir src \

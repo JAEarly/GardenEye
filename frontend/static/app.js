@@ -1,7 +1,7 @@
 let allFiles = [];
 let filteredFiles = [];
 let currentView = 'table';
-let currentSort = { column: 'movement', direction: 'desc' };
+let currentSort = { column: 'name', direction: 'asc' };
 let selectedVideoId = null;
 let annotations = [];
 let showAnnotations = true;
@@ -34,12 +34,6 @@ function setupControls() {
   document.getElementById('search').addEventListener('input', (e) => {
     filterFiles(e.target.value);
   });
-  
-  // Mode selector
-  const mode = document.getElementById('mode');
-  const opt1 = document.createElement('option'); opt1.value = 'normal'; opt1.textContent = "Normal"; mode.appendChild(opt1);
-  const opt2 = document.createElement('option'); opt2.value = 'movement'; opt2.textContent = "Movement"; mode.appendChild(opt2);
-  mode.addEventListener('change', updateVideoSource);
   
   // Annotations toggle
   document.getElementById('annotations').addEventListener('change', (e) => {
@@ -97,7 +91,6 @@ function renderTableView(container) {
   const columns = [
     { key: 'name', label: 'Name' },
     { key: 'size', label: 'Size' },
-    { key: 'movement', label: 'Movement Score' }
   ];
   
   columns.forEach(col => {
@@ -134,12 +127,6 @@ function renderTableView(container) {
     sizeCell.textContent = `${(file.size / 1048576).toFixed(1)} MB`;
     row.appendChild(sizeCell);
     
-    // Movement Score
-    const movementCell = document.createElement('td');
-    const movementSpan = createMovementBadge(file.movement);
-    movementCell.appendChild(movementSpan);
-    row.appendChild(movementCell);
-    
     row.addEventListener('click', () => selectVideo(file.vid));
     tbody.appendChild(row);
   });
@@ -166,12 +153,9 @@ function renderGridView(container) {
     const title = document.createElement('h3');
     title.className = 'card-title';
     title.textContent = file.name;
-    
-    const movementBadge = createMovementBadge(file.movement);
-    
+
     header.appendChild(title);
-    header.appendChild(movementBadge);
-    
+
     const meta = document.createElement('div');
     meta.className = 'card-meta';
     
@@ -188,27 +172,6 @@ function renderGridView(container) {
   });
   
   container.appendChild(grid);
-}
-
-function createMovementBadge(movement) {
-  const span = document.createElement('span');
-  span.className = 'movement-score';
-  
-  if (movement === -1) {
-    span.textContent = 'Not processed';
-    span.classList.add('movement-none');
-  } else {
-    span.textContent = movement.toFixed(3);
-    if (movement > 0.1) {
-      span.classList.add('movement-high');
-    } else if (movement > 0.05) {
-      span.classList.add('movement-medium');
-    } else {
-      span.classList.add('movement-low');
-    }
-  }
-  
-  return span;
 }
 
 function sortFiles(column) {
@@ -249,11 +212,10 @@ function updateVideoSource() {
   if (!selectedVideoId) return;
   
   const player = document.getElementById('player');
-  const mode = document.getElementById('mode').value;
   const prevTime = player.currentTime;
   const wasPaused = player.paused;
   
-  player.src = `/stream?vid=${selectedVideoId}&mode=${mode}`;
+  player.src = `/stream?vid=${selectedVideoId}`;
   player.currentTime = prevTime;
   if (!wasPaused) {
     player.play();
