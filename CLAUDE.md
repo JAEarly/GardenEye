@@ -84,8 +84,8 @@ Both backend and detection use:
 - **mypy** for type checking
 - **just** for task running
 
-**Backend** (`garden-eye`): FastAPI, Peewee ORM, Polars, uvicorn, httpx (for testing)
-**Detection** (`garden-eye-detection`): OpenCV, NumPy, PyTorch, YOLO (Ultralytics), tqdm
+**Backend** (`garden-eye`): FastAPI, Peewee ORM, uvicorn, httpx (for testing)
+**Detection** (`garden-eye-detection`): OpenCV, YOLO (Ultralytics), tqdm
 
 The detection package depends on the backend package via local editable install.
 

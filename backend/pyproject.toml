@@ -7,7 +7,6 @@ dependencies = [
     "fastapi>=0.116.1",
     "httpx>=0.28.1",
     "peewee>=3.18.2",
-    "polars>=1.33.0",
     "uvicorn>=0.35.0",
 ]
 
@@ -68,3 +67,9 @@ asyncio_mode = "auto"
 [tool.coverage.run]
 source = ["src"]
 omit = ["*/tests/*"]
+
+[tool.creosote]
+exclude-deps = [
+    "httpx",
+    "uvicorn"
+]

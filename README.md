@@ -69,8 +69,8 @@ cd detection && just fmt lint test
 ```
 
 ### Technology Stack
-- **Backend**: FastAPI, Peewee ORM, Polars, SQLite, uvicorn
-- **Detection**: OpenCV, NumPy, PyTorch, YOLO (Ultralytics), tqdm
+- **Backend**: FastAPI, Peewee ORM, SQLite, uvicorn
+- **Detection**: OpenCV, YOLO (Ultralytics), tqdm
 - **Development**: uv, just, ruff, mypy, pytest
 - **CI/CD**: GitHub Actions, Renovate
 - **Frontend**: Vanilla HTML/CSS/JavaScript
