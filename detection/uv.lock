@@ -614,6 +614,7 @@ dev = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "ruff" },
+    { name = "types-peewee" },
     { name = "types-tqdm" },
 ]
 
@@ -636,6 +637,7 @@ dev = [
     { name = "pytest", specifier = ">=8.0.0" },
     { name = "pytest-cov", specifier = ">=6.0.0" },
     { name = "ruff", specifier = ">=0.12.10" },
+    { name = "types-peewee", specifier = ">=3.18.2.20250710" },
     { name = "types-tqdm", specifier = ">=4.67.0.20250809" },
 ]
 
@@ -2529,6 +2531,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/92/e8/2a73ccf9874ec4c7638f172efc8972ceab13a0e3480b389d6ed822f7a822/typer-0.17.4.tar.gz", hash = "sha256:b77dc07d849312fd2bb5e7f20a7af8985c7ec360c45b051ed5412f64d8dc1580", size = 103734, upload_time = "2025-09-05T18:14:40.746Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/93/72/6b3e70d32e89a5cbb6a4513726c1ae8762165b027af569289e19ec08edd8/typer-0.17.4-py3-none-any.whl", hash = "sha256:015534a6edaa450e7007eba705d5c18c3349dcea50a6ad79a5ed530967575824", size = 46643, upload_time = "2025-09-05T18:14:39.166Z" },
+]
+
+[[package]]
+name = "types-peewee"
+version = "3.18.2.20250710"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/89/5f/37fc1ae26b0b75f0bd4fa9ddd14d2188c74aae140eee2b41372746b057b6/types_peewee-3.18.2.20250710.tar.gz", hash = "sha256:8fc803df43f42f663798300d36cd5015478960c8cca5e27de9676c42ff3b74f1", size = 20722, upload_time = "2025-07-10T03:15:43.097Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1a/bf/307bae454876eb9f8536217572d1adfc23fa6bf5ee4ef8665a911028e918/types_peewee-3.18.2.20250710-py3-none-any.whl", hash = "sha256:f4fa6f849247a9167abf11e5908354efbd41c1f5f2cca66abf6900d2332b03c3", size = 19090, upload_time = "2025-07-10T03:15:42.015Z" },
 ]
 
 [[package]]

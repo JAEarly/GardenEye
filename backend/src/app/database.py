@@ -27,7 +27,7 @@ class VideoFile(Model):
 
 
 class Annotation(Model):
-    video_file = ForeignKeyField(VideoFile, backref='annotations')
+    video_file = ForeignKeyField(VideoFile, backref="annotations")
     frame_idx = IntegerField()
     name = CharField()  # Object class name (e.g., "dog")
     class_id = IntegerField()  # Numeric class ID
@@ -45,16 +45,10 @@ def init_database(db_path: Path = DATABASE_PATH) -> SqliteDatabase:
     # Add tables
     db.bind([VideoFile, Annotation])
     db.create_tables([VideoFile, Annotation])
-    # Add the annotated column if it doesn't exist (for existing databases)
-    try:
-        db.execute_sql('ALTER TABLE videofile ADD COLUMN annotated BOOLEAN DEFAULT 0')
-    except Exception:
-        # Column already exists or other error, continue
-        pass
     # Add indexes for better query performance
-    db.execute_sql('CREATE INDEX IF NOT EXISTS idx_annotation_video_frame ON annotation (video_file_id, frame_idx)')
-    db.execute_sql('CREATE INDEX IF NOT EXISTS idx_annotation_video_name ON annotation (video_file_id, name)')
-    db.execute_sql('CREATE INDEX IF NOT EXISTS idx_annotation_confidence ON annotation (confidence)')
+    db.execute_sql("CREATE INDEX IF NOT EXISTS idx_annotation_video_frame ON annotation (video_file_id, frame_idx)")
+    db.execute_sql("CREATE INDEX IF NOT EXISTS idx_annotation_video_name ON annotation (video_file_id, name)")
+    db.execute_sql("CREATE INDEX IF NOT EXISTS idx_annotation_confidence ON annotation (confidence)")
     return db
 
 

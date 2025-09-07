@@ -3,10 +3,11 @@ from pathlib import Path
 
 import cv2
 import torch
+from app import DATA_DIR
 from app.database import Annotation, VideoFile, add_files, init_database
+from peewee import chunked
 from tqdm import tqdm
 from ultralytics import YOLO
-from peewee import chunked
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -20,18 +21,14 @@ def run() -> None:
 
 
 def annotate(video_path: Path) -> None:
-    # Set cache directory for YOLO weights to /tmp
-    os.environ['YOLO_CONFIG_DIR'] = '/tmp'
+    # Set cache directory for YOLO weights to data directory
+    os.environ["YOLO_CONFIG_DIR"] = os.fspath(DATA_DIR)
     model = YOLO("yolo11n.pt")
 
     # Get the VideoFile from database
-    try:
-        video_file = VideoFile.get(VideoFile.path == video_path)
-    except VideoFile.DoesNotExist:
-        print(f"Video file not found in database: {video_path}")
-        return
+    video_file = VideoFile.get(VideoFile.path == video_path)
 
-    # Open input video with cv2 just to grab metadata (fps, size)
+    # Open input video with cv2 just to grab FPS
     cap = cv2.VideoCapture(os.fspath(video_path))
     n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     cap.release()
@@ -53,22 +50,24 @@ def annotate(video_path: Path) -> None:
                 confidence = float(box.conf[0].cpu().numpy())
                 class_id = int(box.cls[0].cpu().numpy())
                 name = model.names[class_id]
-                
-                annotations_data.append({
-                    'video_file': video_file.id,
-                    'frame_idx': frame_idx,
-                    'name': name,
-                    'class_id': class_id,
-                    'confidence': confidence,
-                    'x1': float(x1),
-                    'y1': float(y1),
-                    'x2': float(x2),
-                    'y2': float(y2),
-                })
+
+                annotations_data.append(
+                    {
+                        "video_file": video_file.id,
+                        "frame_idx": frame_idx,
+                        "name": name,
+                        "class_id": class_id,
+                        "confidence": confidence,
+                        "x1": float(x1),
+                        "y1": float(y1),
+                        "x2": float(x2),
+                        "y2": float(y2),
+                    }
+                )
 
     # Bulk insert annotations into database
     if annotations_data:
-        with Annotation._meta.database.atomic():
+        with Annotation._meta.database.atomic():  # type: ignore[attr-defined]
             for batch in chunked(annotations_data, 50):  # pick size based on column count
                 Annotation.insert_many(batch).execute()
 

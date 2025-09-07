@@ -19,6 +19,7 @@ dependencies = [
 dev = [
     "mypy>=1.17.1",
     "ruff>=0.12.10",
+    "types-peewee>=3.18.2.20250710",
     "types-tqdm>=4.67.0.20250809",
     "pytest>=8.0.0",
     "pytest-cov>=6.0.0",
