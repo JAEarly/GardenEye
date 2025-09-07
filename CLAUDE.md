@@ -8,9 +8,9 @@ GardenEye is a wildlife camera web viewer with three main components:
 
 - **Backend** (`backend/`): FastAPI application serving video files and metadata
 - **Frontend** (`frontend/`): Single-page HTML application for video viewing  
-- **Detection** (`detection/`): Computer vision module for motion analysis
+- **Detection** (`detection/`): Computer vision module for movement analysis and object detection
 
-The backend serves videos from the `data/` directory, processes them to compute movement scores, and stores metadata in a SQLite database. The frontend displays videos with a simple interface, streaming both original and movement-processed versions.
+The backend serves videos from the `data/` directory, processes them to compute movement scores, and stores metadata in a SQLite database. The detection module includes both frame-difference movement analysis and YOLO-based object detection with annotation storage. The frontend displays videos with a simple interface, streaming both original and movement-processed versions.
 
 The backend package is named `garden-eye` and detection is `garden-eye-detection`, with source code organized under `src/` directories.
 
@@ -45,6 +45,9 @@ just test    # pytest with coverage
 
 # Run motion detection processing
 uv run python -m detection.frame_diff
+
+# Run object detection and annotation
+uv run python -m detection.annotate
 ```
 
 ## Architecture
@@ -59,15 +62,18 @@ uv run python -m detection.frame_diff
 
 ### Detection Structure (`garden-eye-detection`)
 - `detection/src/detection/frame_diff.py`: OpenCV-based movement detection algorithm
+- `detection/src/detection/annotate.py`: YOLO-based object detection and annotation storage
 - Depends on backend package via editable install (`uv.sources`)
-- Processes videos to generate frame-difference analysis
+- Processes videos to generate frame-difference analysis and object detection annotations
 - Secure subprocess handling for ffmpeg operations
 
 ### Video Processing Pipeline
 1. Videos placed in `data/` directory are discovered by `add_files(video_dir)`
-2. `VideoFile` model stores path, size, modification time, and movement score (-1 = unprocessed)
-3. Detection module (`frame_diff.py`) processes videos to compute frame-by-frame movement
-4. Creates `*_movement.mp4` files showing absolute differences between consecutive frames
+2. `VideoFile` model stores path, size, modification time, movement score (-1 = unprocessed), and annotation status
+3. Detection module processes videos in two ways:
+   - `frame_diff.py`: Computes frame-by-frame movement analysis and creates `*_movement.mp4` files
+   - `annotate.py`: Runs YOLO object detection and stores bounding box annotations in database
+4. `Annotation` model stores detected objects with bounding boxes, confidence scores, and frame positions
 5. Frontend can stream both original and movement-processed videos via HTTP range requests
 
 ### Key API Endpoints
@@ -83,8 +89,8 @@ Both backend and detection use:
 - **mypy** for type checking
 - **just** for task running
 
-**Backend** (`garden-eye`): FastAPI, Peewee ORM, uvicorn, httpx (for testing)
-**Detection** (`garden-eye-detection`): OpenCV, NumPy, matplotlib, tqdm
+**Backend** (`garden-eye`): FastAPI, Peewee ORM, Polars, uvicorn, httpx (for testing)
+**Detection** (`garden-eye-detection`): OpenCV, NumPy, matplotlib, tqdm, PyTorch Lightning, PyTorch Wildlife, YOLO (Ultralytics), PyQt6, OmegaConf
 
 The detection package depends on the backend package via local editable install.
 
@@ -104,7 +110,10 @@ The detection package depends on the backend package via local editable install.
 - **Renovate**: Automated dependency updates
 
 ### Frontend Structure
-- `frontend/static/index.html`: Single-page HTML application with embedded CSS and JavaScript
+- `frontend/static/index.html`: Single-page HTML application 
+- `frontend/static/style.css`: Separate CSS stylesheet
+- `frontend/static/app.js`: Separate JavaScript application logic
+- `frontend/static/images/`: Logo and branding assets
 - Dark theme UI with video selection interface and streaming controls
 - Supports both normal and movement-processed video modes
 - Uses `/api/videos` endpoint and `/stream` for video delivery

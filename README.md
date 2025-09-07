@@ -7,13 +7,13 @@
 
 <br/>
 
-A wildlife camera web viewer that processes videos to detect and visualize movement, perfect for monitoring garden wildlife.
+A wildlife camera web viewer that processes videos to detect and visualize movement and identify objects using AI, perfect for monitoring garden wildlife.
 
 ## Features
 
-- **Video Processing**: Automatic detection and analysis of movement in wildlife camera footage using OpenCV
+- **AI Object Detection**: YOLO-based wildlife detection and annotation with confidence scoring
+- **Movement Analysis**: Frame-by-frame movement detection and visualization using OpenCV
 - **Web Interface**: Simple, clean web interface for viewing videos with dark theme
-- **Movement Visualization**: Frame-by-frame movement analysis with generated movement videos
 - **Fast Streaming**: Efficient video streaming with HTTP range support for large files
 - **Comprehensive Testing**: Full test coverage with automated CI/CD pipeline
 - **Security-First**: Secure subprocess handling and comprehensive linting with ruff and mypy
@@ -21,7 +21,7 @@ A wildlife camera web viewer that processes videos to detect and visualize movem
 ## Quick Start
 
 ### Prerequisites
-- Python 3.10+
+- Python 3.13+
 - [uv](https://github.com/astral-sh/uv) for package management
 - [just](https://github.com/casey/just) for task running
 - FFmpeg for video processing
@@ -42,6 +42,9 @@ Visit http://localhost:8000 to view the application.
 # Place your .MP4 files in the data/ directory
 # Then run movement detection
 cd detection && uv run python -m detection.frame_diff
+
+# Run AI object detection and annotation
+cd detection && uv run python -m detection.annotate
 ```
 
 ## Development
@@ -70,8 +73,8 @@ cd detection && just fmt lint test
 ```
 
 ### Technology Stack
-- **Backend**: FastAPI, Peewee ORM, SQLite, uvicorn
-- **Detection**: OpenCV, NumPy, matplotlib, tqdm
+- **Backend**: FastAPI, Peewee ORM, Polars, SQLite, uvicorn
+- **Detection**: OpenCV, NumPy, PyTorch Lightning, PyTorch Wildlife, YOLO (Ultralytics), matplotlib, tqdm
 - **Development**: uv, just, ruff, mypy, pytest
 - **CI/CD**: GitHub Actions, Renovate
 - **Frontend**: Vanilla HTML/CSS/JavaScript
@@ -88,11 +91,16 @@ cd detection && just fmt lint test
 │   └── pyproject.toml    # Backend dependencies and config
 ├── detection/             # Computer vision module (garden-eye-detection)
 │   ├── src/detection/    # Detection source code
-│   │   └── frame_diff.py # Movement detection algorithm
+│   │   ├── frame_diff.py # Movement detection algorithm
+│   │   └── annotate.py   # YOLO object detection and annotation
 │   ├── tests/            # Detection tests
 │   └── pyproject.toml    # Detection dependencies and config
 ├── frontend/              # Single-page HTML application
-│   └── static/index.html # Web interface with embedded CSS/JS
+│   └── static/           # Web assets
+│       ├── index.html    # Main HTML page
+│       ├── style.css     # Stylesheet
+│       ├── app.js        # JavaScript application
+│       └── images/       # Logo and branding assets
 ├── data/                  # Video files directory (gitignored)
 ├── .github/
 │   ├── workflows/        # GitHub Actions CI/CD
