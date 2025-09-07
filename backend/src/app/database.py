@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from peewee import CharField, FloatField, IntegerField, Model, SqliteDatabase
+from peewee import BooleanField, CharField, FloatField, ForeignKeyField, IntegerField, Model, SqliteDatabase
 
 from app import DATA_DIR, DATABASE_PATH
 from app.log import get_logger
@@ -23,14 +23,32 @@ class VideoFile(Model):
     modified = FloatField()  # Modification time in seconds
     # Score between 0 (no movement) and 1 (maximum movement). -1 indicates not computed.
     movement = FloatField(default=-1)
+    annotated = BooleanField(default=False)  # Whether annotations have been processed
+
+
+class Annotation(Model):
+    video_file = ForeignKeyField(VideoFile, backref="annotations")
+    frame_idx = IntegerField()
+    name = CharField()  # Object class name (e.g., "dog")
+    class_id = IntegerField()  # Numeric class ID
+    confidence = FloatField()
+    x1 = FloatField()  # Bounding box coordinates
+    y1 = FloatField()
+    x2 = FloatField()
+    y2 = FloatField()
 
 
 def init_database(db_path: Path = DATABASE_PATH) -> SqliteDatabase:
     logger.info(f"Initialising database with {db_path=}")
     db = SqliteDatabase(db_path)
     db.connect()
-    db.bind([VideoFile])
-    db.create_tables([VideoFile])
+    # Add tables
+    db.bind([VideoFile, Annotation])
+    db.create_tables([VideoFile, Annotation])
+    # Add indexes for better query performance
+    db.execute_sql("CREATE INDEX IF NOT EXISTS idx_annotation_video_frame ON annotation (video_file_id, frame_idx)")
+    db.execute_sql("CREATE INDEX IF NOT EXISTS idx_annotation_video_name ON annotation (video_file_id, name)")
+    db.execute_sql("CREATE INDEX IF NOT EXISTS idx_annotation_confidence ON annotation (confidence)")
     return db
 
 

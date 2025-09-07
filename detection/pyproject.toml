@@ -5,9 +5,13 @@ readme = "../README.md"
 requires-python = ">=3.13"
 dependencies = [
     "garden-eye",
+    "lightning>=2.5.5",
     "matplotlib>=3.10.6",
     "numpy>=2.2.6",
+    "omegaconf>=2.3.0",
     "opencv-python>=4.11.0.86",
+    "pyqt6>=6.9.1",
+    "pytorchwildlife>=1.2.4.1",
     "tqdm>=4.67.1",
 ]
 
@@ -15,6 +19,7 @@ dependencies = [
 dev = [
     "mypy>=1.17.1",
     "ruff>=0.12.10",
+    "types-peewee>=3.18.2.20250710",
     "types-tqdm>=4.67.0.20250809",
     "pytest>=8.0.0",
     "pytest-cov>=6.0.0",
