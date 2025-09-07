@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Any, Literal
+from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -33,7 +33,6 @@ class VideoOut(BaseModel):
     vid: int
     name: str
     size: int
-    movement: float
     modified: float | None = None
 
 
@@ -77,13 +76,12 @@ def list_videos() -> list[VideoOut]:
     """Return a flat list of video files from the database."""
     items: list[VideoOut] = []
     # Query the DB and order by path for stable output
-    for vf in VideoFile.select().order_by(VideoFile.movement.desc()):
+    for vf in VideoFile.select().order_by(VideoFile.path.asc()):
         items.append(
             VideoOut(
                 vid=vf.id,
                 name=vf.path.name,
                 size=int(vf.size),
-                movement=vf.movement,
             )
         )
     return items
@@ -111,14 +109,8 @@ def get_annotations(vid: int) -> list[AnnotationOut]:
 
 
 @app.get("/stream")
-async def stream(request: Request, vid: int, mode: Literal["normal", "movement"]) -> Response:
+async def stream(request: Request, vid: int) -> Response:
     """Stream a media file with Range support."""
     vf = VideoFile.get_by_id(vid)
-    match mode:
-        case "normal":
-            path = vf.path
-        case "movement":
-            path = vf.path.with_stem(vf.path.stem + "_movement").with_suffix(".mp4")
-        case _:
-            raise HTTPException(status_code=400, detail=f"Invalid mode: {mode}")
-    return range_file_response(path, request)
+    print(vf)
+    return range_file_response(vf.path, request)

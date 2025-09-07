@@ -3,7 +3,7 @@ from pathlib import Path
 
 import cv2
 import torch
-from app import DATA_DIR
+from app import WEIGHTS_DIR
 from app.database import Annotation, VideoFile, add_files, init_database
 from peewee import chunked
 from tqdm import tqdm
@@ -20,10 +20,15 @@ def run() -> None:
             annotate(vf.path)
 
 
+def create_model(model_name: str = "yolo11n.pt") -> YOLO:
+    WEIGHTS_DIR.mkdir(parents=True, exist_ok=True)
+    model_path = WEIGHTS_DIR / model_name
+    model = YOLO(model_path)
+    return model
+
+
 def annotate(video_path: Path) -> None:
-    # Set cache directory for YOLO weights to data directory
-    os.environ["YOLO_CONFIG_DIR"] = os.fspath(DATA_DIR)
-    model = YOLO("yolo11n.pt")
+    model = create_model()
 
     # Get the VideoFile from database
     video_file = VideoFile.get(VideoFile.path == video_path)
