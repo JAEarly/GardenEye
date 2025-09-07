@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from starlette.responses import Response
 
 from app import STATIC_ROOT
-from app.database import VideoFile, add_files, init_database
+from app.database import VideoFile, Annotation, add_files, init_database
 from app.log import get_logger
 from app.range_stream import range_file_response
 
@@ -35,6 +35,17 @@ class VideoOut(BaseModel):
     size: int
     movement: float
     modified: float | None = None
+
+
+class AnnotationOut(BaseModel):
+    frame_idx: int
+    name: str
+    class_id: int
+    confidence: float
+    x1: float
+    y1: float
+    x2: float
+    y2: float
 
 
 # Setup app
@@ -76,6 +87,31 @@ def list_videos() -> list[VideoOut]:
             )
         )
     return items
+
+
+@app.get("/api/annotations/{vid}")
+def get_annotations(vid: int) -> list[AnnotationOut]:
+    """Return annotations for a specific video."""
+    try:
+        video_file = VideoFile.get_by_id(vid)
+    except VideoFile.DoesNotExist:
+        raise HTTPException(status_code=404, detail="Video not found")
+    
+    annotations = []
+    for annotation in Annotation.select().where(Annotation.video_file == video_file):
+        annotations.append(
+            AnnotationOut(
+                frame_idx=annotation.frame_idx,
+                name=annotation.name,
+                class_id=annotation.class_id,
+                confidence=annotation.confidence,
+                x1=annotation.x1,
+                y1=annotation.y1,
+                x2=annotation.x2,
+                y2=annotation.y2,
+            )
+        )
+    return annotations
 
 
 @app.get("/stream")

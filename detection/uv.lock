@@ -569,6 +569,7 @@ dependencies = [
     { name = "fastapi" },
     { name = "httpx" },
     { name = "peewee" },
+    { name = "polars" },
     { name = "uvicorn" },
 ]
 
@@ -577,6 +578,7 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.116.1" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "peewee", specifier = ">=3.18.2" },
+    { name = "polars", specifier = ">=1.33.0" },
     { name = "uvicorn", specifier = ">=0.35.0" },
 ]
 

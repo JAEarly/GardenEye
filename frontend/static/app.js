@@ -3,6 +3,8 @@ let filteredFiles = [];
 let currentView = 'table';
 let currentSort = { column: 'movement', direction: 'desc' };
 let selectedVideoId = null;
+let annotations = [];
+let showAnnotations = true;
 
 async function init() {
   try {
@@ -38,6 +40,15 @@ function setupControls() {
   const opt1 = document.createElement('option'); opt1.value = 'normal'; opt1.textContent = "Normal"; mode.appendChild(opt1);
   const opt2 = document.createElement('option'); opt2.value = 'movement'; opt2.textContent = "Movement"; mode.appendChild(opt2);
   mode.addEventListener('change', updateVideoSource);
+  
+  // Annotations toggle
+  document.getElementById('annotations').addEventListener('change', (e) => {
+    showAnnotations = e.target.checked;
+    drawAnnotations();
+  });
+  
+  // Setup video player for annotation overlays
+  setupVideoPlayer();
 }
 
 function setView(view) {
@@ -227,8 +238,9 @@ function sortFiles(column) {
   renderView();
 }
 
-function selectVideo(vid) {
+async function selectVideo(vid) {
   selectedVideoId = vid;
+  await loadAnnotations(vid);
   updateVideoSource();
   renderView(); // Re-render to update selection
 }
@@ -246,6 +258,136 @@ function updateVideoSource() {
   if (!wasPaused) {
     player.play();
   }
+}
+
+async function loadAnnotations(vid) {
+  try {
+    const res = await fetch(`/api/annotations/${vid}`);
+    annotations = await res.json();
+  } catch (error) {
+    console.error('Failed to load annotations:', error);
+    annotations = [];
+  }
+}
+
+function setupVideoPlayer() {
+  const player = document.getElementById('player');
+  const canvas = document.getElementById('annotation-overlay');
+  
+  // Update canvas size when video loads
+  player.addEventListener('loadedmetadata', () => {
+    resizeCanvas();
+  });
+  
+  // Start annotation rendering when video plays
+  player.addEventListener('play', () => {
+    startAnnotationLoop(player);
+  });
+
+  // Stop rendering when paused or ended
+  player.addEventListener('pause', () => {
+    stopAnnotationLoop();
+  });
+
+  player.addEventListener('ended', () => {
+    stopAnnotationLoop();
+  });
+  
+  // Handle window resize
+  window.addEventListener('resize', resizeCanvas);
+}
+
+let stopLoop = false;
+
+function startAnnotationLoop(player) {
+  stopLoop = false;
+
+  if (player.requestVideoFrameCallback) {
+    // Use high-precision API if available
+    const onFrame = (now, metadata) => {
+      if (stopLoop) return;
+      drawAnnotations(metadata.mediaTime);
+      player.requestVideoFrameCallback(onFrame);
+    };
+    player.requestVideoFrameCallback(onFrame);
+  } else {
+    // Fallback: poll with requestAnimationFrame
+    const render = () => {
+      if (stopLoop || player.paused || player.ended) return;
+      drawAnnotations(player.currentTime);
+      requestAnimationFrame(render);
+    };
+    requestAnimationFrame(render);
+  }
+}
+
+function stopAnnotationLoop() {
+  stopLoop = true;
+}
+
+function resizeCanvas() {
+  const player = document.getElementById('player');
+  const canvas = document.getElementById('annotation-overlay');
+  
+  canvas.width = player.offsetWidth;
+  canvas.height = player.offsetHeight;
+  drawAnnotations();
+}
+
+function drawAnnotations(time) {
+  const player = document.getElementById('player');
+  const canvas = document.getElementById('annotation-overlay');
+  const ctx = canvas.getContext('2d');
+  
+  // Clear canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  if (!showAnnotations || annotations.length === 0 || player.paused) {
+    return;
+  }
+
+  // TODO(jearly): Get FPS from video metadata
+  // Calculate current frame (assuming 30fps)
+  const fps = 30; // You might want to get this from video metadata
+  const currentFrame = Math.floor(time * fps);
+  
+  // Get annotations for current frame
+  const frameAnnotations = annotations.filter(ann => ann.frame_idx === currentFrame);
+  
+  if (frameAnnotations.length === 0) return;
+  
+  // Calculate scaling factors
+  const scaleX = canvas.width / player.videoWidth;
+  const scaleY = canvas.height / player.videoHeight;
+  
+  // Draw bounding boxes
+  ctx.strokeStyle = '#00ff00';
+  ctx.lineWidth = 2;
+  ctx.font = '14px system-ui';
+  ctx.fillStyle = '#00ff00';
+  
+  frameAnnotations.forEach(ann => {
+    const x = ann.x1 * scaleX;
+    const y = ann.y1 * scaleY;
+    const width = (ann.x2 - ann.x1) * scaleX;
+    const height = (ann.y2 - ann.y1) * scaleY;
+    
+    // Draw bounding box
+    ctx.strokeRect(x, y, width, height);
+    
+    // Draw label background
+    const label = `${ann.name} (${(ann.confidence * 100).toFixed(1)}%)`;
+    const labelWidth = ctx.measureText(label).width + 8;
+    const labelHeight = 20;
+    
+    ctx.fillStyle = '#00ff00';
+    ctx.fillRect(x, y - labelHeight, labelWidth, labelHeight);
+    
+    // Draw label text
+    ctx.fillStyle = '#000000';
+    ctx.fillText(label, x + 4, y - 6);
+    ctx.fillStyle = '#00ff00';
+  });
 }
 
 // Initialize the app
