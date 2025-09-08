@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
@@ -12,7 +13,7 @@ from pydantic import BaseModel
 from starlette.responses import Response
 
 from app import STATIC_ROOT
-from app.database import Annotation, VideoFile, add_files, get_video_objects, init_database
+from app.database import Annotation, VideoFile, add_files, get_thumbnail_path, get_video_objects, init_database
 from app.log import get_logger
 from app.range_stream import range_file_response
 
@@ -35,6 +36,7 @@ class VideoOut(BaseModel):
     size: int
     modified: float | None = None
     objects: list[str] = []
+    thumbnail_url: str
 
 
 class AnnotationOut(BaseModel):
@@ -84,6 +86,7 @@ def list_videos() -> list[VideoOut]:
                 name=vf.path.name,
                 size=int(vf.size),
                 objects=get_video_objects(vf),
+                thumbnail_url=f"/api/thumbnail/{vf.id}",
             )
         )
     return items
@@ -110,9 +113,28 @@ def get_annotations(vid: int) -> list[AnnotationOut]:
     return annotations
 
 
+@app.get("/api/thumbnail/{vid}")
+async def get_thumbnail(vid: int) -> FileResponse:
+    """Serve thumbnail image for video."""
+    vf = VideoFile.get_by_id(vid)
+
+    # Check if thumbnail exists
+    thumbnail_path = get_thumbnail_path(Path(vf.path))
+    if not thumbnail_path.exists():
+        raise HTTPException(404, detail="Thumbnail not found")
+
+    return FileResponse(
+        thumbnail_path,
+        media_type="image/jpeg",
+        headers={
+            "Cache-Control": "public, max-age=86400",  # Cache for 24 hours
+            "ETag": f'"{thumbnail_path.stat().st_mtime}"',
+        },
+    )
+
+
 @app.get("/stream")
 async def stream(request: Request, vid: int) -> Response:
     """Stream a media file with Range support."""
     vf = VideoFile.get_by_id(vid)
-    print(vf)
     return range_file_response(vf.path, request)

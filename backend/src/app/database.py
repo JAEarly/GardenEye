@@ -3,9 +3,8 @@ from pathlib import Path
 
 from peewee import BooleanField, CharField, FloatField, ForeignKeyField, IntegerField, Model, SqliteDatabase, fn
 
-from app import DATA_DIR, DATABASE_PATH
+from app import DATA_DIR, DATABASE_PATH, THUMBNAIL_DIR
 from app.log import get_logger
-from app import THUMBNAIL_DIR
 
 logger = get_logger(__name__)
 
