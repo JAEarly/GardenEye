@@ -447,6 +447,29 @@ video {
   gap: 4px;
 }
 
+.card-objects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.object-label {
+  background-color: #238636;
+  color: #ffffff;
+  font-size: 0.7em;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.no-objects {
+  font-size: 0.8em;
+  opacity: 0.6;
+  font-style: italic;
+}
+
 .hidden {
   display: none;
 }
