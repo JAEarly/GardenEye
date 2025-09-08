@@ -1,6 +1,24 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
-  ]
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":automergeMinor"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": ["python"],
+      "enabled": false
+    }
+  ],
+  "schedule": ["before 6am on monday"],
+  "timezone": "Europe/London",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on the first day of the month"]
+  },
+  "commitMessagePrefix": "renovate:",
+  "prHourlyLimit": 3,
+  "prConcurrentLimit": 5
 }

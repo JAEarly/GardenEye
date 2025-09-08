@@ -2,12 +2,9 @@
 # TODO List
 
 ## Frontend Improvements
-- [ ] Improve front-end layout and UI/UX
-- [ ] Fix bounding boxes rendering - currently rendered in video instead of overlay
+- [x] Improve front-end layout and UI/UX
 - [ ] Add bounding box support for full screen mode
-- [ ] Fix FPS synchronization issue (annotations don't line up with video frames)
-- [ ] Add annotation confidence score display in UI
-- [ ] Add object class filtering/toggle in frontend
+- [x] Fix FPS synchronization issue (annotations don't line up with video frames)
 
 ## Data & Analytics
 - [ ] Create video summary page showing detected objects per video
@@ -16,6 +13,7 @@
 - [ ] Export annotations to standard formats (COCO, YOLO, etc.)
 
 ## AI/ML Enhancements  
+- [x] Remove movement detection functionality
 - [ ] Experiment with different YOLO model sizes (nano vs small vs medium)
 - [ ] Add support for custom trained models
 - [ ] Implement confidence threshold configuration
@@ -27,10 +25,7 @@
 - [ ] Improve test coverage for edge cases (corrupted videos, etc.)
 
 ## Performance & Optimization
+- [x] Simplify dependency structure
 - [ ] Add video thumbnail generation for faster browsing
 - [ ] Implement annotation caching/indexing for faster queries
 - [ ] Add progress tracking for long-running annotation jobs
-
-## Completed
-- [x] Remove movement detection functionality 
-- [x] Simplify dependency structure
