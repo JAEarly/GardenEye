@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from starlette.responses import Response
 
 from app import STATIC_ROOT
-from app.database import Annotation, VideoFile, add_files, init_database
+from app.database import Annotation, VideoFile, add_files, get_video_objects, init_database
 from app.log import get_logger
 from app.range_stream import range_file_response
 
@@ -34,6 +34,7 @@ class VideoOut(BaseModel):
     name: str
     size: int
     modified: float | None = None
+    objects: list[str] = []
 
 
 class AnnotationOut(BaseModel):
@@ -82,6 +83,7 @@ def list_videos() -> list[VideoOut]:
                 vid=vf.id,
                 name=vf.path.name,
                 size=int(vf.size),
+                objects=get_video_objects(vf),
             )
         )
     return items
@@ -89,7 +91,7 @@ def list_videos() -> list[VideoOut]:
 
 @app.get("/api/annotations/{vid}")
 def get_annotations(vid: int) -> list[AnnotationOut]:
-    """Return annotations for a specific video."""
+    """Returns annotations for a specific video."""
     video_file = VideoFile.get_by_id(vid)
     annotations = []
     for annotation in Annotation.select().where(Annotation.video_file == video_file):

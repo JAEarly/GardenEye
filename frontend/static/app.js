@@ -186,6 +186,14 @@ function createCollapsedCard(file, card) {
   
   meta.appendChild(sizeSpan);
   
+  // Add objects container
+  const objectsContainer = document.createElement('div');
+  objectsContainer.className = 'card-objects';
+  
+  // Display objects directly from the file data
+  displayVideoObjects(file.objects, objectsContainer);
+  meta.appendChild(objectsContainer);
+  
   content.appendChild(header);
   content.appendChild(meta);
   
@@ -238,6 +246,12 @@ function createExpandedCard(file) {
   const sizeSpan = document.createElement('span');
   sizeSpan.innerHTML = `📁 ${(file.size / 1048576).toFixed(1)} MB`;
   meta.appendChild(sizeSpan);
+  
+  // Add objects container for expanded view
+  const objectsContainer = document.createElement('div');
+  objectsContainer.className = 'card-objects';
+  displayVideoObjects(file.objects, objectsContainer);
+  meta.appendChild(objectsContainer);
   
   info.appendChild(title);
   info.appendChild(meta);
@@ -655,6 +669,29 @@ function drawAnnotations(time) {
     ctx.fillStyle = '#000000';
     ctx.fillText(label, x + 4, y - 6);
     ctx.fillStyle = '#00ff00';
+  });
+}
+
+function displayVideoObjects(objects, container) {
+  container.innerHTML = ''; // Clear existing content
+  
+  if (!objects || objects.length === 0) {
+    const noObjectsSpan = document.createElement('span');
+    noObjectsSpan.className = 'no-objects';
+    noObjectsSpan.textContent = 'No objects detected';
+    container.appendChild(noObjectsSpan);
+    return;
+  }
+  
+  // Convert Set to Array if needed
+  const objectArray = Array.isArray(objects) ? objects : Array.from(objects);
+  
+  // Create labels for each object
+  objectArray.forEach(objectName => {
+    const label = document.createElement('span');
+    label.className = 'object-label';
+    label.textContent = objectName;
+    container.appendChild(label);
   });
 }
 

@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from peewee import BooleanField, CharField, FloatField, ForeignKeyField, IntegerField, Model, SqliteDatabase
+from peewee import BooleanField, CharField, FloatField, ForeignKeyField, IntegerField, Model, SqliteDatabase, fn
 
 from app import DATA_DIR, DATABASE_PATH
 from app.log import get_logger
@@ -57,3 +57,17 @@ def add_files(video_dir: Path = DATA_DIR) -> None:
         st = path.stat()
         data.append({"path": path, "size": st.st_size, "modified": st.st_mtime})
     VideoFile.insert_many(data).on_conflict_ignore().execute()
+
+
+def get_video_objects(video_file: VideoFile) -> list[str]:
+    """Gets the list of unique objects in a particular video, ordered by frequency, e.g. `("dog", "cat", "person")`."""
+    # Use SQL aggregation to count annotations by object name and sort by frequency
+    objects = (
+        Annotation.select(Annotation.name, fn.COUNT().alias("count"))
+        .where(Annotation.video_file == video_file)
+        .group_by(Annotation.name)
+        .order_by(fn.COUNT().desc())
+    )
+
+    # Return as ordered set (preserves frequency-based ordering when converted to list)
+    return [obj.name for obj in objects]
