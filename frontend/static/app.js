@@ -160,10 +160,22 @@ function createPlaceholderCard(file) {
 }
 
 function createCollapsedCard(file, card) {
-  // Thumbnail placeholder (ready for future implementation)
+  // Thumbnail with image
   const thumbnail = document.createElement('div');
   thumbnail.className = 'card-thumbnail';
-  thumbnail.innerHTML = '🎥'; // Placeholder - will be replaced with actual thumbnail
+  
+  const img = document.createElement('img');
+  img.src = file.thumbnail_url;
+  img.alt = `Thumbnail for ${file.name}`;
+  img.className = 'thumbnail-image';
+  
+  // Fallback to emoji if image fails to load
+  img.onerror = function() {
+    thumbnail.innerHTML = '🎥';
+    thumbnail.classList.add('thumbnail-fallback');
+  };
+  
+  thumbnail.appendChild(img);
   
   const content = document.createElement('div');
   content.className = 'card-content';

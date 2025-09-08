@@ -3,7 +3,7 @@ from pathlib import Path
 
 from peewee import BooleanField, CharField, FloatField, ForeignKeyField, IntegerField, Model, SqliteDatabase, fn
 
-from app import DATA_DIR, DATABASE_PATH
+from app import DATA_DIR, DATABASE_PATH, THUMBNAIL_DIR
 from app.log import get_logger
 
 logger = get_logger(__name__)
@@ -71,3 +71,7 @@ def get_video_objects(video_file: VideoFile) -> list[str]:
 
     # Return as ordered set (preserves frequency-based ordering when converted to list)
     return [obj.name for obj in objects]
+
+
+def get_thumbnail_path(video_path: Path) -> Path:
+    return THUMBNAIL_DIR / f"{video_path.stem}.jpg"
