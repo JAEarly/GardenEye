@@ -5,6 +5,7 @@ from peewee import BooleanField, CharField, FloatField, ForeignKeyField, Integer
 
 from app import DATA_DIR, DATABASE_PATH
 from app.log import get_logger
+from app import THUMBNAIL_DIR
 
 logger = get_logger(__name__)
 
@@ -71,3 +72,7 @@ def get_video_objects(video_file: VideoFile) -> list[str]:
 
     # Return as ordered set (preserves frequency-based ordering when converted to list)
     return [obj.name for obj in objects]
+
+
+def get_thumbnail_path(video_path: Path) -> Path:
+    return THUMBNAIL_DIR / f"{video_path.stem}.jpg"
