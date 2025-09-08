@@ -12,11 +12,10 @@
       "enabled": false
     }
   ],
-  "schedule": ["before 6am on monday"],
+  "schedule": ["before 6am"],
   "timezone": "Europe/London",
   "lockFileMaintenance": {
-    "enabled": true,
-    "schedule": ["before 6am on the first day of the month"]
+    "enabled": true
   },
   "commitMessagePrefix": "renovate:",
   "prHourlyLimit": 3,
