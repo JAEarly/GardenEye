@@ -12,7 +12,8 @@ A wildlife camera web viewer that uses AI to identify and annotate objects in wi
 ## Features
 
 - **AI Object Detection**: YOLO-based wildlife detection and annotation with confidence scoring and bounding boxes
-- **Web Interface**: Simple, clean web interface for viewing videos with dark theme
+- **Thumbnail Previews**: Automatic generation of video thumbnails for improved browsing experience
+- **Web Interface**: Simple, clean web interface with video grid and expandable player
 - **Fast Streaming**: Efficient video streaming with HTTP range support for large files
 - **Comprehensive Testing**: Full test coverage with automated CI/CD pipeline
 - **Security-First**: Secure subprocess handling and comprehensive linting with ruff and mypy
@@ -41,6 +42,9 @@ Visit http://localhost:8000 to view the application.
 # Place your .MP4 files in the data/ directory
 # Run AI object detection and annotation
 cd detection && uv run python -m detection.annotate
+
+# Generate thumbnail previews (optional - for better browsing)
+cd detection && uv run python -m detection.thumbnail
 ```
 
 ## Development
@@ -70,7 +74,7 @@ cd detection && just fmt lint test
 
 ### Technology Stack
 - **Backend**: FastAPI, Peewee ORM, SQLite, uvicorn
-- **Detection**: OpenCV, YOLO (Ultralytics), tqdm
+- **Detection**: OpenCV, YOLO (Ultralytics), FFmpeg, tqdm
 - **Development**: uv, just, ruff, mypy, pytest
 - **CI/CD**: GitHub Actions, Renovate
 - **Frontend**: Vanilla HTML/CSS/JavaScript
@@ -87,7 +91,8 @@ cd detection && just fmt lint test
 │   └── pyproject.toml    # Backend dependencies and config
 ├── detection/             # Computer vision module (garden-eye-detection)
 │   ├── src/detection/    # Detection source code
-│   │   └── annotate.py   # YOLO object detection and annotation
+│   │   ├── annotate.py   # YOLO object detection and annotation
+│   │   └── thumbnail.py  # FFmpeg-based thumbnail generation
 │   ├── tests/            # Detection tests
 │   └── pyproject.toml    # Detection dependencies and config
 ├── frontend/              # Single-page HTML application
@@ -96,7 +101,9 @@ cd detection && just fmt lint test
 │       ├── style.css     # Stylesheet
 │       ├── app.js        # JavaScript application
 │       └── images/       # Logo and branding assets
-├── data/                  # Video files directory (gitignored)
+├── data/                  # Video files and thumbnails directory (gitignored)
+│   ├── thumbnails/       # Generated thumbnail images
+│   └── 25_10_08/         # Video files organized by date
 ├── weights/               # YOLO model weights directory (gitignored)
 ├── .github/
 │   ├── workflows/        # GitHub Actions CI/CD

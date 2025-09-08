@@ -26,6 +26,6 @@
 
 ## Performance & Optimization
 - [x] Simplify dependency structure
-- [ ] Add video thumbnail generation for faster browsing
+- [x] Add video thumbnail generation for faster browsing
 - [ ] Implement annotation caching/indexing for faster queries
 - [ ] Add progress tracking for long-running annotation jobs
