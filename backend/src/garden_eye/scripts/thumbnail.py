@@ -1,4 +1,3 @@
-import logging
 import os
 import shutil
 import subprocess
@@ -7,8 +6,9 @@ from pathlib import Path
 from tqdm import tqdm
 
 from garden_eye.api.database import VideoFile, add_files, get_thumbnail_path, init_database
+from garden_eye.log import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def run() -> None:

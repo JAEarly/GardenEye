@@ -7,11 +7,11 @@
 
 <br/>
 
-A wildlife camera web viewer that uses AI to identify and annotate objects in wildlife footage, perfect for monitoring garden wildlife.
+A wildlife camera web viewer that uses AI to identify and annotate wildlife and people in camera footage, focusing on specific target objects like birds, cats, dogs, and other animals.
 
 ## Features
 
-- **AI Object Detection**: YOLO-based wildlife detection and annotation with confidence scoring and bounding boxes
+- **AI Object Detection**: YOLO-based wildlife and people detection with filtering to target objects (person, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe) with confidence scoring and bounding boxes
 - **Thumbnail Previews**: Automatic generation of video thumbnails for improved browsing experience
 - **Web Interface**: Simple, clean web interface with video grid and expandable player
 - **Fast Streaming**: Efficient video streaming with HTTP range support for large files

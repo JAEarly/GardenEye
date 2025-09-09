@@ -21,8 +21,9 @@ from garden_eye.api.database import (
     get_video_objects,
     init_database,
 )
-from garden_eye.api.log import get_logger
 from garden_eye.api.range_stream import range_file_response
+from garden_eye.helpers import is_target_coco_annotation
+from garden_eye.log import get_logger
 
 # Configure uvicorn loggers
 for name in ["uvicorn", "uvicorn.error", "uvicorn.access"]:
@@ -105,6 +106,9 @@ def get_annotations(vid: int) -> list[AnnotationOut]:
     video_file = VideoFile.get_by_id(vid)
     annotations = []
     for annotation in Annotation.select().where(Annotation.video_file == video_file):
+        # TODO(jearly): Remove once re-annotated
+        if not is_target_coco_annotation(annotation.name):
+            continue
         annotations.append(
             AnnotationOut(
                 frame_idx=annotation.frame_idx,

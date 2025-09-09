@@ -4,7 +4,8 @@ from pathlib import Path
 from peewee import BooleanField, CharField, FloatField, ForeignKeyField, IntegerField, Model, SqliteDatabase, fn
 
 from garden_eye import DATA_DIR, DATABASE_PATH, THUMBNAIL_DIR
-from garden_eye.api.log import get_logger
+from garden_eye.helpers import is_target_coco_annotation
+from garden_eye.log import get_logger
 
 logger = get_logger(__name__)
 
@@ -69,8 +70,9 @@ def get_video_objects(video_file: VideoFile) -> list[str]:
         .order_by(fn.COUNT().desc())
     )
 
+    # TODO(jearly): Remove once re-annotated
     # Return as ordered set (preserves frequency-based ordering when converted to list)
-    return [obj.name for obj in objects]
+    return [obj.name for obj in objects if is_target_coco_annotation(obj.name)]
 
 
 def get_thumbnail_path(video_path: Path) -> Path:
