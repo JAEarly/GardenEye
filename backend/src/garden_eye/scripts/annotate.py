@@ -1,13 +1,18 @@
+from garden_eye.helpers import check_optional_dependency_group
+
+check_optional_dependency_group("ml")
+
 import os
 from pathlib import Path
 
 import cv2
 import torch
-from app import WEIGHTS_DIR
-from app.database import Annotation, VideoFile, add_files, init_database
 from peewee import chunked
 from tqdm import tqdm
 from ultralytics import YOLO
+
+from garden_eye import WEIGHTS_DIR
+from garden_eye.api.database import Annotation, VideoFile, add_files, init_database
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 

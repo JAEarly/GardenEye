@@ -25,7 +25,7 @@
 - [ ] Improve test coverage for edge cases (corrupted videos, etc.)
 
 ## Performance & Optimization
-- [x] Simplify dependency structure
+- [x] Simplify dependency structure (merged detection into backend)
 - [x] Add video thumbnail generation for faster browsing
 - [ ] Implement annotation caching/indexing for faster queries
 - [ ] Add progress tracking for long-running annotation jobs

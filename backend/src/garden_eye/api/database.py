@@ -3,8 +3,8 @@ from pathlib import Path
 
 from peewee import BooleanField, CharField, FloatField, ForeignKeyField, IntegerField, Model, SqliteDatabase, fn
 
-from app import DATA_DIR, DATABASE_PATH, THUMBNAIL_DIR
-from app.log import get_logger
+from garden_eye import DATA_DIR, DATABASE_PATH, THUMBNAIL_DIR
+from garden_eye.api.log import get_logger
 
 logger = get_logger(__name__)
 

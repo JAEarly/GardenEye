@@ -16,14 +16,9 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        project: [backend, detection]
-
     defaults:
       run:
-        working-directory: ${{ matrix.project }}
+        working-directory: backend
 
     steps:
       - name: Checkout
@@ -35,7 +30,7 @@ jobs:
       - name: Install python
         uses: actions/setup-python@v6
         with:
-          python-version-file: ${{ matrix.project }}/.python-version
+          python-version-file: backend/.python-version
       - name: Install uv
         uses: astral-sh/setup-uv@v6
         with:
@@ -48,14 +43,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        project: [backend, detection]
-
     defaults:
       run:
-        working-directory: ${{ matrix.project }}
+        working-directory: backend
 
     steps:
       - name: Checkout
@@ -67,7 +57,7 @@ jobs:
       - name: Install python
         uses: actions/setup-python@v6
         with:
-          python-version-file: ${{ matrix.project }}/.python-version
+          python-version-file: backend/.python-version
       - name: Install uv
         uses: astral-sh/setup-uv@v6
         with:

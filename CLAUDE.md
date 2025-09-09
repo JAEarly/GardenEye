@@ -4,75 +4,67 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-GardenEye is a wildlife camera web viewer with three main components:
+GardenEye is a wildlife camera web viewer with two main components:
 
-- **Backend** (`backend/`): FastAPI application serving video files and metadata
-- **Frontend** (`frontend/`): Single-page HTML application for video viewing  
-- **Detection** (`detection/`): Computer vision module for AI-powered object detection
+- **Backend** (`backend/`): FastAPI application serving video files and metadata, including AI object detection
+- **Frontend** (`frontend/`): Single-page HTML application for video viewing
 
-The backend serves videos from the `data/` directory and stores metadata in a SQLite database. The detection module uses YOLO-based object detection to identify and annotate wildlife in videos. The frontend displays videos with a simple interface for viewing original videos and their AI-detected annotations.
+The backend serves videos from the `data/` directory and stores metadata in a SQLite database. The backend includes AI detection scripts that use YOLO-based object detection to identify and annotate wildlife in videos. The frontend displays videos with a simple interface for viewing original videos and their AI-detected annotations.
 
-The backend package is named `garden-eye` and detection is `garden-eye-detection`, with source code organized under `src/` directories.
+The backend package is named `garden-eye` with source code organized under `src/garden_eye/`.
 
 ## Development Commands
 
-### Root Level (Unified Commands)
+### Root Level Commands
 ```bash
-# Install all dependencies
+# Install all dependencies (including optional ml dependencies)
 just install
 
 # Start development server
 just run
 
-# Run across all workspaces
-just fmt     # Format code in backend + detection
-just lint    # Lint code in backend + detection  
-just test    # Run tests in backend + detection
-just clean   # Clean artifacts in backend + detection
+# Run across backend workspace
+just fmt     # Format code in backend
+just lint    # Lint code in backend  
+just test    # Run tests in backend
+just clean   # Clean artifacts in backend
 ```
 
-### Individual Workspaces
+### Backend Commands
 ```bash
-# Backend (from `backend/` directory)
+# From `backend/` directory
 just fmt     # ruff format + ruff check --fix
 just lint    # ruff check + mypy
 just test    # pytest with coverage
 
-# Detection (from `detection/` directory) 
-just fmt     # ruff format + ruff check --fix
-just lint    # ruff check + mypy
-just test    # pytest with coverage
+# Install with optional ML dependencies for detection/annotation
+uv sync --locked --all-extras --dev
 
-# Run object detection and annotation
-uv run python -m detection.annotate
+# Run object detection and annotation (requires ml extras)
+uv run python -m garden_eye.scripts.annotate
 
-# Generate thumbnail previews for all videos
-uv run python -m detection.thumbnail
+# Generate thumbnail previews for all videos (requires ml extras)
+uv run python -m garden_eye.scripts.thumbnail
 ```
 
 ## Architecture
 
 ### Backend Structure (`garden-eye`)
-- `backend/src/app/main.py`: FastAPI application with video streaming endpoints
-- `backend/src/app/database.py`: Peewee ORM models and file discovery logic
-- `backend/src/app/range_stream.py`: HTTP range request handling for efficient video streaming
-- `backend/src/app/log.py`: Centralized logging configuration
+- `backend/src/garden_eye/api/main.py`: FastAPI application with video streaming endpoints
+- `backend/src/garden_eye/api/database.py`: Peewee ORM models and file discovery logic
+- `backend/src/garden_eye/api/range_stream.py`: HTTP range request handling for efficient video streaming
+- `backend/src/garden_eye/api/log.py`: Centralized logging configuration
+- `backend/src/garden_eye/scripts/annotate.py`: YOLO-based object detection and annotation storage
+- `backend/src/garden_eye/scripts/thumbnail.py`: FFmpeg-based thumbnail generation for video previews
 - `backend/tests/`: Comprehensive test suite with 90%+ coverage
 - Uses SQLite database at `data/database.db`
 - YOLO model weights stored in `weights/` directory
 
-### Detection Structure (`garden-eye-detection`)
-- `detection/src/detection/annotate.py`: YOLO-based object detection and annotation storage
-- `detection/src/detection/thumbnail.py`: FFmpeg-based thumbnail generation for video previews
-- Depends on backend package via editable install (`uv.sources`)
-- Processes videos to detect and annotate wildlife objects using AI
-- Generates thumbnail previews for improved browsing experience
-
 ### Video Processing Pipeline
 1. Videos placed in `data/` directory are discovered by `add_files(video_dir)`
 2. `VideoFile` model stores path, size, modification time, and annotation status
-3. Detection module (`annotate.py`) runs YOLO object detection and stores bounding box annotations in database
-4. Thumbnail module (`thumbnail.py`) generates video preview images using FFmpeg at `data/thumbnails/`
+3. Detection script (`garden_eye.scripts.annotate`) runs YOLO object detection and stores bounding box annotations in database
+4. Thumbnail script (`garden_eye.scripts.thumbnail`) generates video preview images using FFmpeg at `data/thumbnails/`
 5. `Annotation` model stores detected objects with bounding boxes, confidence scores, and frame positions
 6. Frontend displays thumbnail previews and can stream videos via HTTP range requests with AI-detected annotations
 
@@ -85,22 +77,21 @@ uv run python -m detection.thumbnail
 
 ## Dependencies
 
-Both backend and detection use:
+The backend uses:
 - **uv** for Python package management
 - **ruff** for linting and formatting
 - **mypy** for type checking
 - **just** for task running
 
-**Backend** (`garden-eye`): FastAPI, Peewee ORM, uvicorn, httpx (for testing)
-**Detection** (`garden-eye-detection`): OpenCV, YOLO (Ultralytics), tqdm, FFmpeg (for thumbnails)
-
-The detection package depends on the backend package via local editable install.
+**Backend** (`garden-eye`): 
+- Core dependencies: FastAPI, Peewee ORM, uvicorn, httpx (for testing), tqdm
+- Optional ML dependencies (for AI detection): OpenCV, YOLO (Ultralytics), FFmpeg (for thumbnails)
+- Dev dependencies: mypy, ruff, pytest, pytest-cov, pytest-asyncio
 
 ## Testing & Quality
 
 ### Test Coverage
-- Backend: 90%+ test coverage with comprehensive test suite
-- Detection: 84% test coverage with mocked OpenCV operations  
+- Backend: 90%+ test coverage with comprehensive test suite including detection scripts
 - Tests use `test__<thing>__<outcome>` naming convention
 - All test functions have `-> None` return type annotations
 
@@ -140,7 +131,7 @@ The detection package depends on the backend package via local editable install.
 - 120-character line length limit
 - Import sorting and modern Python syntax (pyupgrade)
 
-### Workspace Management
-- Use `just` commands from root for cross-workspace operations
-- Individual workspace commands available in each package directory
+### Project Management
+- Use `just` commands from root for backend operations
+- Backend commands available in the `backend/` directory
 - Unified dependency management with uv and locked versions
