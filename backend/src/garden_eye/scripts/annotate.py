@@ -13,6 +13,7 @@ from ultralytics import YOLO
 
 from garden_eye import WEIGHTS_DIR
 from garden_eye.api.database import Annotation, VideoFile, add_files, init_database
+from garden_eye.helpers import is_target_coco_annotation
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -55,11 +56,15 @@ def annotate(video_path: Path) -> None:
         # Process detection results
         if result.boxes is not None and len(result.boxes) > 0:
             for box in result.boxes:
+                # Skip classes that are not in our set of targets
+                class_id = int(box.cls[0].cpu().numpy())
+                name = model.names[class_id]
+                if not is_target_coco_annotation(name):
+                    continue
+
                 # Extract bounding box coordinates
                 x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
                 confidence = float(box.conf[0].cpu().numpy())
-                class_id = int(box.cls[0].cpu().numpy())
-                name = model.names[class_id]
 
                 annotations_data.append(
                     {

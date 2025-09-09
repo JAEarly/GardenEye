@@ -9,7 +9,7 @@ GardenEye is a wildlife camera web viewer with two main components:
 - **Backend** (`backend/`): FastAPI application serving video files and metadata, including AI object detection
 - **Frontend** (`frontend/`): Single-page HTML application for video viewing
 
-The backend serves videos from the `data/` directory and stores metadata in a SQLite database. The backend includes AI detection scripts that use YOLO-based object detection to identify and annotate wildlife in videos. The frontend displays videos with a simple interface for viewing original videos and their AI-detected annotations.
+The backend serves videos from the `data/` directory and stores metadata in a SQLite database. The backend includes AI detection scripts that use YOLO-based object detection to identify and annotate wildlife in videos, filtering to only target wildlife and people objects (person, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe). The frontend displays videos with a simple interface for viewing original videos and their AI-detected annotations.
 
 The backend package is named `garden-eye` with source code organized under `src/garden_eye/`.
 
@@ -54,7 +54,8 @@ uv run python -m garden_eye.scripts.thumbnail
 - `backend/src/garden_eye/api/database.py`: Peewee ORM models and file discovery logic
 - `backend/src/garden_eye/api/range_stream.py`: HTTP range request handling for efficient video streaming
 - `backend/src/garden_eye/api/log.py`: Centralized logging configuration
-- `backend/src/garden_eye/scripts/annotate.py`: YOLO-based object detection and annotation storage
+- `backend/src/garden_eye/scripts/annotate.py`: YOLO-based object detection and annotation storage (filters to target wildlife/people)
+- `backend/src/garden_eye/helpers.py`: Helper functions including `COCO_TARGET_LABELS` for annotation filtering
 - `backend/src/garden_eye/scripts/thumbnail.py`: FFmpeg-based thumbnail generation for video previews
 - `backend/tests/`: Comprehensive test suite with 90%+ coverage
 - Uses SQLite database at `data/database.db`
@@ -63,14 +64,14 @@ uv run python -m garden_eye.scripts.thumbnail
 ### Video Processing Pipeline
 1. Videos placed in `data/` directory are discovered by `add_files(video_dir)`
 2. `VideoFile` model stores path, size, modification time, and annotation status
-3. Detection script (`garden_eye.scripts.annotate`) runs YOLO object detection and stores bounding box annotations in database
+3. Detection script (`garden_eye.scripts.annotate`) runs YOLO object detection and stores only target wildlife/people annotations in database (filters using `COCO_TARGET_LABELS`)
 4. Thumbnail script (`garden_eye.scripts.thumbnail`) generates video preview images using FFmpeg at `data/thumbnails/`
 5. `Annotation` model stores detected objects with bounding boxes, confidence scores, and frame positions
 6. Frontend displays thumbnail previews and can stream videos via HTTP range requests with AI-detected annotations
 
 ### Key API Endpoints
 - `/api/videos`: List all video files with metadata including thumbnail URLs (JSON response)
-- `/api/annotations/{vid}`: Get AI-detected annotations for a specific video
+- `/api/annotations/{vid}`: Get AI-detected annotations for a specific video (filtered to target wildlife/people objects)
 - `/api/thumbnail/{vid}`: Serve thumbnail image for video with caching headers
 - `/stream?vid={id}`: Stream video with HTTP Range support for efficient playback
 - `/`: Serves the frontend single-page application

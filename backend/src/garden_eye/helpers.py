@@ -1,10 +1,26 @@
 import importlib.metadata as metadata
-import logging
 import re
 import tomllib
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
+from garden_eye.log import get_logger
+
+logger = get_logger(__name__)
+
+
+COCO_TARGET_LABELS = {
+    0: "person",
+    14: "bird",
+    15: "cat",
+    16: "dog",
+    17: "horse",
+    18: "sheep",
+    19: "cow",
+    20: "elephant",
+    21: "bear",
+    22: "zebra",
+    23: "giraffe",
+}
 
 
 def check_optional_dependency_group(group: str) -> None:
@@ -35,3 +51,7 @@ def check_optional_dependency_group(group: str) -> None:
             f" Missing dependencies: {', '.join(missing_deps)}."
             f" Install command: `uv sync --extra {group}`."
         )
+
+
+def is_target_coco_annotation(label: str) -> bool:
+    return label in COCO_TARGET_LABELS.values()
