@@ -2,7 +2,7 @@
 
 default: fmt lint test clean
 
-workspaces := "backend detection"
+workspaces := "backend"
 
 # Run fmt/lint/test across all workspaces
 fmt:

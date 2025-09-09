@@ -12,10 +12,17 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from starlette.responses import Response
 
-from app import STATIC_ROOT
-from app.database import Annotation, VideoFile, add_files, get_thumbnail_path, get_video_objects, init_database
-from app.log import get_logger
-from app.range_stream import range_file_response
+from garden_eye import STATIC_ROOT
+from garden_eye.api.database import (
+    Annotation,
+    VideoFile,
+    add_files,
+    get_thumbnail_path,
+    get_video_objects,
+    init_database,
+)
+from garden_eye.api.log import get_logger
+from garden_eye.api.range_stream import range_file_response
 
 # Configure uvicorn loggers
 for name in ["uvicorn", "uvicorn.error", "uvicorn.access"]:
@@ -50,7 +57,7 @@ class AnnotationOut(BaseModel):
     y2: float
 
 
-# Setup app
+# Setup garden_eye
 app = FastAPI(title="GardenEye", version="0.1.0", lifespan=lifespan)
 
 # CORS for local dev: allow everything on localhost

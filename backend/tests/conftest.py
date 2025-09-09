@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from peewee import SqliteDatabase
 
-from app.database import init_database
+from garden_eye.api.database import init_database
 
 
 @pytest.fixture

@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 import pytest
 from fastapi import HTTPException, Request
 
-from app.range_stream import _parse_range, range_file_response
+from garden_eye.api.range_stream import _parse_range, range_file_response
 
 
 def test__parse_range__valid_start_end() -> None:

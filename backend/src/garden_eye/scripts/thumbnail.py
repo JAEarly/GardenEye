@@ -4,8 +4,9 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from app.database import VideoFile, add_files, get_thumbnail_path, init_database
 from tqdm import tqdm
+
+from garden_eye.api.database import VideoFile, add_files, get_thumbnail_path, init_database
 
 logger = logging.getLogger(__name__)
 

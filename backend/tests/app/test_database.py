@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from peewee import IntegrityError, SqliteDatabase
 
-from app.database import Annotation, PathField, VideoFile, get_video_objects, init_database
+from garden_eye.api.database import Annotation, PathField, VideoFile, get_video_objects, init_database
 
 
 def test__path_field__converts_between_path_and_string() -> None:
@@ -55,7 +55,7 @@ def test__init_database__creates_tables() -> None:
 
 def test__add_files__adds_video_files(test_db: SqliteDatabase, tmp_path: Path) -> None:
     """Test add_files function adds video files to database."""
-    from app.database import add_files
+    from garden_eye.api.database import add_files
 
     # Create mock video files
     video_dir = tmp_path / "videos"
@@ -81,7 +81,7 @@ def test__add_files__adds_video_files(test_db: SqliteDatabase, tmp_path: Path) -
 
 def test__add_files__skips_existing_files(test_db: SqliteDatabase, tmp_path: Path) -> None:
     """Test add_files function skips existing files."""
-    from app.database import add_files
+    from garden_eye.api.database import add_files
 
     # Create mock video file
     video_dir = tmp_path / "videos"
