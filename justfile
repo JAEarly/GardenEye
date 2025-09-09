@@ -33,17 +33,15 @@ clean:
         cd $ws && just clean ; cd ../
     done
 
-# Install dependencies for both projects
+# Install dependencies for backend (including optional ML dependencies)
 install:
     @echo "Installing dependencies for backend..."
     cd backend && uv sync --locked --all-extras --dev
-    @echo "Installing dependencies for detection..."
-    cd detection && uv sync --locked --all-extras --dev
 
 # Run development server
 run:
     @echo "Starting development server..."
-    cd backend && uv run python -m uvicorn app.main:app --reload \
+    cd backend && uv run python -m uvicorn garden_eye.api.main:app --reload \
       --reload-dir src \
       --reload-dir ../frontend \
       --reload-dir ../data

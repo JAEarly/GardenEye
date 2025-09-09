@@ -28,7 +28,7 @@ A wildlife camera web viewer that uses AI to identify and annotate objects in wi
 
 ### Setup
 ```bash
-# Install dependencies
+# Install dependencies (includes optional ML dependencies for AI detection)
 just install
 
 # Start development server
@@ -40,22 +40,22 @@ Visit http://localhost:8000 to view the application.
 ### Processing Videos
 ```bash
 # Place your .MP4 files in the data/ directory
-# Run AI object detection and annotation
-cd detection && uv run python -m detection.annotate
+# Run AI object detection and annotation (requires ML dependencies)
+cd backend && uv run python -m garden_eye.scripts.annotate
 
-# Generate thumbnail previews (optional - for better browsing)
-cd detection && uv run python -m detection.thumbnail
+# Generate thumbnail previews (requires ML dependencies - optional for better browsing)
+cd backend && uv run python -m garden_eye.scripts.thumbnail
 ```
 
 ## Development
 
-This project uses a monorepo structure with two Python packages managed by **uv** and coordinated with **just**.
+This project uses a single Python package managed by **uv** and coordinated with **just**.
 
 ### Running Commands
 ```bash
-# Format code across all workspaces (backend + detection)
-# Run linting across all workspaces (ruff + mypy)
-# Run tests across all workspaces (pytest with coverage)
+# Format code in backend
+# Run linting in backend (ruff + mypy)
+# Run tests in backend (pytest with coverage)
 # Clean build artifacts
 just fmt lint test clean
 
@@ -63,18 +63,16 @@ just fmt lint test clean
 just help
 ```
 
-### Individual Workspace Commands
+### Backend Commands
 ```bash
-# Backend only
+# Backend commands
 cd backend && just fmt lint test
-
-# Detection only  
-cd detection && just fmt lint test
 ```
 
 ### Technology Stack
-- **Backend**: FastAPI, Peewee ORM, SQLite, uvicorn
-- **Detection**: OpenCV, YOLO (Ultralytics), FFmpeg, tqdm
+- **Backend**: 
+  - Core: FastAPI, Peewee ORM, SQLite, uvicorn, tqdm
+  - Optional ML: OpenCV, YOLO (Ultralytics), FFmpeg (for AI detection and thumbnails)
 - **Development**: uv, just, ruff, mypy, pytest
 - **CI/CD**: GitHub Actions, Renovate
 - **Frontend**: Vanilla HTML/CSS/JavaScript
@@ -82,19 +80,17 @@ cd detection && just fmt lint test
 ### Project Structure
 ```
 ├── backend/               # FastAPI application (garden-eye)
-│   ├── src/app/          # Application source code
-│   │   ├── main.py       # FastAPI app and endpoints
-│   │   ├── database.py   # Peewee ORM models
-│   │   ├── range_stream.py # HTTP range streaming
-│   │   └── log.py        # Logging configuration
+│   ├── src/garden_eye/   # Application source code
+│   │   ├── api/          # FastAPI application
+│   │   │   ├── main.py       # FastAPI app and endpoints
+│   │   │   ├── database.py   # Peewee ORM models
+│   │   │   ├── range_stream.py # HTTP range streaming
+│   │   │   └── log.py        # Logging configuration
+│   │   └── scripts/      # AI detection and processing scripts
+│   │       ├── annotate.py   # YOLO object detection and annotation
+│   │       └── thumbnail.py  # FFmpeg-based thumbnail generation
 │   ├── tests/            # Comprehensive test suite
 │   └── pyproject.toml    # Backend dependencies and config
-├── detection/             # Computer vision module (garden-eye-detection)
-│   ├── src/detection/    # Detection source code
-│   │   ├── annotate.py   # YOLO object detection and annotation
-│   │   └── thumbnail.py  # FFmpeg-based thumbnail generation
-│   ├── tests/            # Detection tests
-│   └── pyproject.toml    # Detection dependencies and config
 ├── frontend/              # Single-page HTML application
 │   └── static/           # Web assets
 │       ├── index.html    # Main HTML page
@@ -108,6 +104,6 @@ cd detection && just fmt lint test
 ├── .github/
 │   ├── workflows/        # GitHub Actions CI/CD
 │   └── renovate.json     # Automated dependency updates
-├── justfile              # Unified task runner for all workspaces
+├── justfile              # Unified task runner for backend
 └── CLAUDE.md             # Development guide for AI assistants
 ```
