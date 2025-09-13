@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**Note**: Your name is Claude. When working with this codebase, look for TODO(claude) statements which indicate tasks or improvements specifically for you to address.
+
 ## Project Overview
 
 GardenEye is a wildlife camera web viewer with two main components:
@@ -40,11 +42,8 @@ just test    # pytest with coverage
 # Install with optional ML dependencies for detection/annotation
 uv sync --locked --all-extras --dev
 
-# Run object detection and annotation (requires ml extras)
-uv run python -m garden_eye.scripts.annotate
-
-# Generate thumbnail previews for all videos (requires ml extras)
-uv run python -m garden_eye.scripts.thumbnail
+# Run full data ingestion pipeline: file discovery, object detection, and thumbnail generation (requires ml extras)
+uv run python -m garden_eye.scripts.ingest_data
 ```
 
 ## Architecture
@@ -54,18 +53,17 @@ uv run python -m garden_eye.scripts.thumbnail
 - `backend/src/garden_eye/api/database.py`: Peewee ORM models and file discovery logic
 - `backend/src/garden_eye/api/range_stream.py`: HTTP range request handling for efficient video streaming
 - `backend/src/garden_eye/api/log.py`: Centralized logging configuration
-- `backend/src/garden_eye/scripts/annotate.py`: YOLO-based object detection and annotation storage (filters to target wildlife/people)
+- `backend/src/garden_eye/scripts/ingest_data.py`: Combined data ingestion pipeline with YOLO-based object detection, annotation storage, and FFmpeg-based thumbnail generation (filters to target wildlife/people)
 - `backend/src/garden_eye/helpers.py`: Helper functions including `COCO_TARGET_LABELS` for annotation filtering
-- `backend/src/garden_eye/scripts/thumbnail.py`: FFmpeg-based thumbnail generation for video previews
 - `backend/tests/`: Comprehensive test suite with 90%+ coverage
 - Uses SQLite database at `data/database.db`
 - YOLO model weights stored in `weights/` directory
 
 ### Video Processing Pipeline
-1. Videos placed in `data/` directory are discovered by `add_files(video_dir)`
+1. Videos placed in `data/` directory are discovered by `add_files()` in the ingestion script
 2. `VideoFile` model stores path, size, modification time, and annotation status
-3. Detection script (`garden_eye.scripts.annotate`) runs YOLO object detection and stores only target wildlife/people annotations in database (filters using `COCO_TARGET_LABELS`)
-4. Thumbnail script (`garden_eye.scripts.thumbnail`) generates video preview images using FFmpeg at `data/thumbnails/`
+3. Ingestion script (`garden_eye.scripts.ingest_data`) runs YOLO object detection and stores only target wildlife/people annotations in database (filters using `COCO_TARGET_LABELS`)
+4. Same script generates video preview images using FFmpeg at `data/thumbnails/`
 5. `Annotation` model stores detected objects with bounding boxes, confidence scores, and frame positions
 6. Frontend displays thumbnail previews and can stream videos via HTTP range requests with AI-detected annotations
 

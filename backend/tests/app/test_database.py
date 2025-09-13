@@ -53,54 +53,6 @@ def test__init_database__creates_tables() -> None:
     db.close()
 
 
-def test__add_files__adds_video_files(test_db: SqliteDatabase, tmp_path: Path) -> None:
-    """Test add_files function adds video files to database."""
-    from garden_eye.api.database import add_files
-
-    # Create mock video files
-    video_dir = tmp_path / "videos"
-    video_dir.mkdir()
-
-    video1 = video_dir / "video1.MP4"
-    video2 = video_dir / "video2.MP4"
-
-    video1.write_bytes(b"fake video 1 content")
-    video2.write_bytes(b"fake video 2 content")
-
-    # Call add_files with the video directory
-    add_files(video_dir)
-
-    # Check that  videos were added
-    videos = list(VideoFile.select())
-    assert len(videos) == 2
-
-    video_names = {v.path.name for v in videos}
-    assert "video1.MP4" in video_names
-    assert "video2.MP4" in video_names
-
-
-def test__add_files__skips_existing_files(test_db: SqliteDatabase, tmp_path: Path) -> None:
-    """Test add_files function skips existing files."""
-    from garden_eye.api.database import add_files
-
-    # Create mock video file
-    video_dir = tmp_path / "videos"
-    video_dir.mkdir()
-
-    video1 = video_dir / "video1.MP4"
-    video1.write_bytes(b"fake video content")
-
-    # Add the file first time
-    add_files(video_dir)
-
-    assert VideoFile.select().count() == 1
-
-    # Add files again - should not create duplicates due to on_conflict_ignore
-    add_files(video_dir)
-
-    assert VideoFile.select().count() == 1  # Still only 1 file
-
-
 def test__get_video_objects__returns_unique_object_names(test_db: SqliteDatabase, sample_video_file: Path) -> None:
     """Test get_video_objects returns unique object names for a video."""
     video = VideoFile.create(path=sample_video_file, size=1024, modified=1234567890.0)

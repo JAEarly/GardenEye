@@ -40,11 +40,8 @@ Visit http://localhost:8000 to view the application.
 ### Processing Videos
 ```bash
 # Place your .MP4 files in the data/ directory
-# Run AI object detection and annotation (requires ML dependencies)
-cd backend && uv run python -m garden_eye.scripts.annotate
-
-# Generate thumbnail previews (requires ML dependencies - optional for better browsing)
-cd backend && uv run python -m garden_eye.scripts.thumbnail
+# Run full data ingestion pipeline: file discovery, AI object detection, and thumbnail generation (requires ML dependencies)
+cd backend && uv run python -m garden_eye.scripts.ingest_data
 ```
 
 ## Development
@@ -86,9 +83,8 @@ cd backend && just fmt lint test
 │   │   │   ├── database.py   # Peewee ORM models
 │   │   │   ├── range_stream.py # HTTP range streaming
 │   │   │   └── log.py        # Logging configuration
-│   │   └── scripts/      # AI detection and processing scripts
-│   │       ├── annotate.py   # YOLO object detection and annotation
-│   │       └── thumbnail.py  # FFmpeg-based thumbnail generation
+│   │   └── scripts/      # Data processing scripts
+│   │       └── ingest_data.py # Combined data ingestion pipeline: file discovery, YOLO object detection, annotation, and FFmpeg-based thumbnail generation
 │   ├── tests/            # Comprehensive test suite
 │   └── pyproject.toml    # Backend dependencies and config
 ├── frontend/              # Single-page HTML application

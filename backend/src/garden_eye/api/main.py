@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
@@ -16,7 +15,6 @@ from garden_eye import STATIC_ROOT
 from garden_eye.api.database import (
     Annotation,
     VideoFile,
-    add_files,
     get_thumbnail_path,
     get_video_objects,
     init_database,
@@ -33,7 +31,6 @@ for name in ["uvicorn", "uvicorn.error", "uvicorn.access"]:
 @asynccontextmanager
 async def lifespan(app_: FastAPI) -> AsyncGenerator[None, Any]:
     db = init_database()
-    add_files()
     yield
     db.close()
 
@@ -130,7 +127,7 @@ async def get_thumbnail(vid: int) -> FileResponse:
     vf = VideoFile.get_by_id(vid)
 
     # Check if thumbnail exists
-    thumbnail_path = get_thumbnail_path(Path(vf.path))
+    thumbnail_path = get_thumbnail_path(vf)
     if not thumbnail_path.exists():
         raise HTTPException(404, detail="Thumbnail not found")
 

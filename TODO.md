@@ -29,5 +29,9 @@
 ## Performance & Optimization
 - [x] Simplify dependency structure (merged detection into backend)
 - [x] Add video thumbnail generation for faster browsing
+- [x] Combine annotation and thumbnail generation into single ingestion pipeline (ingest_data.py)
 - [ ] Implement annotation caching/indexing for faster queries
 - [ ] Add progress tracking for long-running annotation jobs
+
+## Hosting
+- [ ] nginx?
