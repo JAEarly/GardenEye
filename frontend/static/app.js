@@ -5,6 +5,7 @@ let selectedVideoId = null;
 let annotations = [];
 let showAnnotations = true;
 let hideEmpty = false;
+let objectFilter = '';
 
 async function init() {
   try {
@@ -27,19 +28,34 @@ function setupControls() {
     filterFiles();
   });
   
+  // Object filter dropdown
+  document.getElementById('object-filter').addEventListener('change', (e) => {
+    objectFilter = e.target.value;
+    filterFiles();
+  });
+  
   // Setup video player for annotation overlays
   setupVideoPlayer();
 }
 
 
 function filterFiles() {
+  filteredFiles = [...allFiles];
+  
+  // Filter by empty videos if requested
   if (hideEmpty) {
-    filteredFiles = allFiles.filter(file => 
+    filteredFiles = filteredFiles.filter(file => 
       file.objects && file.objects.length > 0
     );
-  } else {
-    filteredFiles = [...allFiles];
   }
+  
+  // Filter by object type if specified
+  if (objectFilter) {
+    filteredFiles = filteredFiles.filter(file => 
+      file.objects && file.objects.includes(objectFilter)
+    );
+  }
+  
   renderView();
 }
 
@@ -181,11 +197,6 @@ function createCollapsedCard(file, card) {
   const meta = document.createElement('div');
   meta.className = 'card-meta';
   
-  const sizeSpan = document.createElement('span');
-  sizeSpan.innerHTML = `📁 ${(file.size / 1048576).toFixed(1)} MB`;
-  
-  meta.appendChild(sizeSpan);
-  
   // Add objects container
   const objectsContainer = document.createElement('div');
   objectsContainer.className = 'card-objects';
@@ -243,9 +254,6 @@ function createExpandedCard(file) {
   
   const meta = document.createElement('div');
   meta.className = 'card-meta';
-  const sizeSpan = document.createElement('span');
-  sizeSpan.innerHTML = `📁 ${(file.size / 1048576).toFixed(1)} MB`;
-  meta.appendChild(sizeSpan);
   
   // Add objects container for expanded view
   const objectsContainer = document.createElement('div');
