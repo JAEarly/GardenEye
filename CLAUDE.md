@@ -108,7 +108,9 @@ The backend uses:
 - `frontend/static/images/`: Logo and branding assets
 - Dark theme UI with video grid displaying thumbnail previews
 - Interactive video selection with expandable player interface
+- Header controls: object class filter dropdown and option to hide videos with no detections
 - Displays AI-detected object annotations with confidence scores and bounding boxes
+- Focuses on AI detection results without file size indicators or search functionality
 - Uses `/api/videos`, `/api/annotations/{vid}`, `/api/thumbnail/{vid}`, and `/stream` endpoints
 
 ## Development Practices
