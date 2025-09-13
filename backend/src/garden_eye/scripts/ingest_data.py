@@ -1,0 +1,119 @@
+from garden_eye.helpers import check_optional_dependency_group
+
+check_optional_dependency_group("ml")
+
+import os
+import shutil
+import subprocess
+
+import torch
+from peewee import chunked
+from tqdm import tqdm
+from ultralytics import YOLO
+
+from garden_eye import DATA_DIR, WEIGHTS_DIR
+from garden_eye.api.database import Annotation, VideoFile, get_thumbnail_path, init_database
+from garden_eye.helpers import is_target_coco_annotation
+from garden_eye.log import get_logger
+
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+MODEL_NAME = "yolo11n.pt"
+MODEL = YOLO(WEIGHTS_DIR / MODEL_NAME)
+
+
+logger = get_logger(__name__)
+
+
+def run() -> None:
+    # Setup database
+    init_database()
+    # Load files into database
+    add_files()
+    # Annotate and create thumbnails for all files
+    for vf in tqdm(VideoFile.select().order_by(VideoFile.path), desc="Ingesting files"):
+        annotate(vf)
+        create_thumbnail(vf)
+
+
+def add_files() -> None:
+    logger.info("Adding files...")
+    data = []
+    for path in DATA_DIR.glob("**/*.MP4"):
+        st = path.stat()
+        data.append({"path": path, "size": st.st_size, "modified": st.st_mtime})
+    result = VideoFile.insert_many(data).on_conflict_ignore().execute()
+    logger.info(f"Added {result} new video files to database")
+
+
+def annotate(video_file: VideoFile) -> None:
+    # Skip if already annotated exists
+    if video_file.annotated:
+        return
+    # Process video and collect annotations
+    annotations_data = []
+    for frame_idx, result in enumerate(MODEL(str(video_file.path), stream=True, verbose=False)):
+        # Process detection results
+        if result.boxes is not None and len(result.boxes) > 0:
+            for box in result.boxes:
+                # Skip classes that are not in our set of targets
+                class_id = int(box.cls[0].cpu().numpy())
+                name = MODEL.names[class_id]
+                if not is_target_coco_annotation(name):
+                    continue
+                # Extract bounding box coordinates
+                x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
+                confidence = float(box.conf[0].cpu().numpy())
+                # Collect
+                annotations_data.append(
+                    {
+                        "video_file": video_file.id,
+                        "frame_idx": frame_idx,
+                        "name": name,
+                        "class_id": class_id,
+                        "confidence": confidence,
+                        "x1": float(x1),
+                        "y1": float(y1),
+                        "x2": float(x2),
+                        "y2": float(y2),
+                    }
+                )
+    # Bulk insert annotations into database
+    if annotations_data:
+        with Annotation._meta.database.atomic():  # type: ignore[attr-defined]
+            for batch in chunked(annotations_data, 50):  # pick size based on column count
+                Annotation.insert_many(batch).execute()
+    # Mark video as annotated (even if no detections were found)
+    video_file.annotated = True  # type: ignore[assignment]
+    video_file.save()
+
+
+def create_thumbnail(video_file: VideoFile, seconds: int = 1) -> None:
+    thumbnail_path = get_thumbnail_path(video_file)
+    # Skip if thumbnail already exists
+    if thumbnail_path.exists():
+        return
+    # Find ffmpeg executable
+    ffmpeg_path = shutil.which("ffmpeg")
+    if not ffmpeg_path:
+        logger.error("ffmpeg not found in PATH")
+        return
+    # Create thumbnail with ffmpeg
+    command = [
+        ffmpeg_path,
+        "-ss",
+        str(seconds),  # Seek to timestamp (seconds)
+        "-i",
+        str(video_file.path),
+        "-vframes",
+        "1",  # Extract 1 frame
+        "-q:v",
+        "2",  # High quality
+        "-s",
+        "280x157",  # Resize to card dimensions
+        os.fspath(thumbnail_path),
+    ]
+    subprocess.run(command, capture_output=True, text=True, check=True)
+
+
+if __name__ == "__main__":
+    run()

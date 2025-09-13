@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**Note**: Your name is Claude. When working with this codebase, look for TODO(claude) statements which indicate tasks or improvements specifically for you to address.
+
 ## Project Overview
 
 GardenEye is a wildlife camera web viewer with two main components:
