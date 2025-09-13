@@ -4,7 +4,7 @@ let currentSort = { column: 'name', direction: 'asc' };
 let selectedVideoId = null;
 let annotations = [];
 let showAnnotations = true;
-let classFilter = '';
+let hideEmpty = false;
 
 async function init() {
   try {
@@ -21,21 +21,10 @@ async function init() {
 }
 
 function setupControls() {
-  // Search input
-  document.getElementById('search').addEventListener('input', (e) => {
-    filterFiles(e.target.value);
-  });
-  
-  // Annotations toggle
-  document.getElementById('annotations').addEventListener('change', (e) => {
-    showAnnotations = e.target.checked;
-    drawAnnotations();
-  });
-  
-  // Class filter
-  document.getElementById('class-filter').addEventListener('change', (e) => {
-    classFilter = e.target.value;
-    drawAnnotations();
+  // Hide empty videos toggle
+  document.getElementById('hide-empty').addEventListener('change', (e) => {
+    hideEmpty = e.target.checked;
+    filterFiles();
   });
   
   // Setup video player for annotation overlays
@@ -43,14 +32,13 @@ function setupControls() {
 }
 
 
-function filterFiles(searchTerm) {
-  if (!searchTerm.trim()) {
-    filteredFiles = [...allFiles];
-  } else {
-    const term = searchTerm.toLowerCase();
+function filterFiles() {
+  if (hideEmpty) {
     filteredFiles = allFiles.filter(file => 
-      file.name.toLowerCase().includes(term)
+      file.objects && file.objects.length > 0
     );
+  } else {
+    filteredFiles = [...allFiles];
   }
   renderView();
 }
@@ -289,15 +277,8 @@ function createExpandedCard(file) {
     drawAnnotations();
   });
   
-  const classFilterClone = document.getElementById('class-filter').cloneNode(true);
-  classFilterClone.addEventListener('change', (e) => {
-    classFilter = e.target.value;
-    drawAnnotations();
-  });
-  
   controls.appendChild(closeButton);
   controls.appendChild(annotationToggle);
-  controls.appendChild(classFilterClone);
   
   content.appendChild(info);
   content.appendChild(controls);
@@ -474,38 +455,12 @@ async function loadAnnotations(vid) {
   try {
     const res = await fetch(`/api/annotations/${vid}`);
     annotations = await res.json();
-    updateClassFilter();
   } catch (error) {
     console.error('Failed to load annotations:', error);
     annotations = [];
   }
 }
 
-function updateClassFilter() {
-  const classSelect = document.getElementById('class-filter');
-  const currentValue = classSelect.value;
-  
-  // Get unique class names from annotations
-  const uniqueClasses = [...new Set(annotations.map(ann => ann.name))].sort();
-  
-  // Clear existing options (except "All Objects")
-  classSelect.innerHTML = '<option value="">All Objects</option>';
-  
-  // Add options for each unique class
-  uniqueClasses.forEach(className => {
-    const option = document.createElement('option');
-    option.value = className;
-    option.textContent = className;
-    classSelect.appendChild(option);
-  });
-  
-  // Restore previous selection if it still exists
-  if (currentValue && uniqueClasses.includes(currentValue)) {
-    classSelect.value = currentValue;
-  } else {
-    classFilter = '';
-  }
-}
 
 function setupVideoPlayer() {
   // Setup window resize handlers for any video players
@@ -640,13 +595,8 @@ function drawAnnotations(time) {
   }
   const currentFrame = Math.floor(time * fps);
   
-  // Get annotations for current frame, filtered by class if specified
+  // Get annotations for current frame
   let frameAnnotations = annotations.filter(ann => ann.frame_idx === currentFrame);
-  
-  // Apply class filter
-  if (classFilter) {
-    frameAnnotations = frameAnnotations.filter(ann => ann.name === classFilter);
-  }
   
   if (frameAnnotations.length === 0) return;
   
