@@ -5,13 +5,13 @@
 - [x] Improve front-end layout and UI/UX
 - [ ] Add bounding box support for full screen mode
 - [x] Fix FPS synchronization issue (annotations don't line up with video frames)
-- [ ] Allow filtering of annotation types by clicking on label (and filter at top)
-- [ ] Filter checkbox of "empty" clips
+- [x] Allow filtering of annotation types by clicking on label (and filter at top) - implemented as object class dropdown
+- [x] Filter checkbox of "empty" clips - implemented as "Hide videos with no detections"
 
 ## Data & Analytics
 - [ ] Create video summary page showing detected objects per video
 - [x] Add annotation filtering to target wildlife/people objects (implemented with COCO_TARGET_LABELS)
-- [ ] Add search functionality for finding videos with specific objects
+- [x] Add search functionality for finding videos with specific objects - implemented as object class filter dropdown
 - [ ] Export annotations to standard formats (COCO, YOLO, etc.)
 
 ## AI/ML Enhancements  
