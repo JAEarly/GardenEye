@@ -24,6 +24,7 @@
 - [x] Add color distribution analysis tools - implemented `day_vs_night.py` script with 3D RGB visualization
 - [x] Add wildlife activity proportion tracking - implemented `wildlife_prop` field in database and API
 - [x] Add wildlife proportion visualization - implemented `annotation_prop.py` script with histogram
+- [ ] Animal count? E.g. 0037 has two foxes
 
 ## AI/ML Enhancements  
 - [x] Remove movement detection functionality
