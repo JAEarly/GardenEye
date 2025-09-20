@@ -12,7 +12,7 @@ A wildlife camera web viewer that uses AI to identify and annotate wildlife and 
 ## Features
 
 - **AI Object Detection**: YOLO-based wildlife and people detection with filtering to target objects (person, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe) with confidence scoring and bounding boxes
-- **Object Filtering**: Filter videos by detected object types or hide videos with no detections
+- **Object Filtering**: Filter videos by detected object types, hide videos with no detections, or filter out person-only videos
 - **Thumbnail Previews**: Automatic generation of video thumbnails for improved browsing experience
 - **Web Interface**: Simple, clean web interface with video grid and expandable player focused on AI detection results
 - **Fast Streaming**: Efficient video streaming with HTTP range support for large files
@@ -82,8 +82,9 @@ cd backend && just fmt lint test
 │   │   ├── api/          # FastAPI application
 │   │   │   ├── main.py       # FastAPI app and endpoints
 │   │   │   ├── database.py   # Peewee ORM models
-│   │   │   ├── range_stream.py # HTTP range streaming
-│   │   │   └── log.py        # Logging configuration
+│   │   │   └── range_stream.py # HTTP range streaming
+│   │   ├── log.py            # Logging configuration
+│   │   ├── helpers.py        # Helper functions and COCO target labels
 │   │   └── scripts/      # Data processing scripts
 │   │       └── ingest_data.py # Combined data ingestion pipeline: file discovery, YOLO object detection, annotation, and FFmpeg-based thumbnail generation
 │   ├── tests/            # Comprehensive test suite

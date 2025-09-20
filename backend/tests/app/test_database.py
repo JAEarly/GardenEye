@@ -116,3 +116,73 @@ def test__get_video_objects__orders_by_annotation_frequency(test_db: SqliteDatab
     objects = get_video_objects(video)
 
     assert objects == ["dog", "bird", "cat"]
+
+
+def test__get_video_objects__filter_person_false_includes_person_only(
+    test_db: SqliteDatabase, sample_video_file: Path
+) -> None:
+    """Test get_video_objects with filter_person=False includes person-only videos."""
+    video = VideoFile.create(path=sample_video_file, size=1024, modified=1234567890.0)
+
+    # Create person annotation only
+    Annotation.create(
+        video_file=video, frame_idx=0, name="person", class_id=0, confidence=0.8, x1=10.0, y1=20.0, x2=50.0, y2=60.0
+    )
+
+    objects = get_video_objects(video, filter_person=False)
+
+    assert objects == ["person"]
+
+
+def test__get_video_objects__filter_person_true_excludes_person_only(
+    test_db: SqliteDatabase, sample_video_file: Path
+) -> None:
+    """Test get_video_objects with filter_person=True excludes person-only videos."""
+    video = VideoFile.create(path=sample_video_file, size=1024, modified=1234567890.0)
+
+    # Create person annotation only
+    Annotation.create(
+        video_file=video, frame_idx=0, name="person", class_id=0, confidence=0.8, x1=10.0, y1=20.0, x2=50.0, y2=60.0
+    )
+
+    objects = get_video_objects(video, filter_person=True)
+
+    assert objects == []
+
+
+def test__get_video_objects__filter_person_true_includes_mixed_objects(
+    test_db: SqliteDatabase, sample_video_file: Path
+) -> None:
+    """Test get_video_objects with filter_person=True includes videos with person and other objects."""
+    video = VideoFile.create(path=sample_video_file, size=1024, modified=1234567890.0)
+
+    # Create person and dog annotations
+    Annotation.create(
+        video_file=video, frame_idx=0, name="person", class_id=0, confidence=0.8, x1=10.0, y1=20.0, x2=50.0, y2=60.0
+    )
+    Annotation.create(
+        video_file=video, frame_idx=1, name="dog", class_id=16, confidence=0.9, x1=15.0, y1=25.0, x2=55.0, y2=65.0
+    )
+
+    objects = get_video_objects(video, filter_person=True)
+
+    assert len(objects) == 2
+    assert "person" in objects
+    assert "dog" in objects
+
+
+def test__get_video_objects__filters_non_target_annotations(test_db: SqliteDatabase, sample_video_file: Path) -> None:
+    """Test get_video_objects filters out non-target COCO annotations."""
+    video = VideoFile.create(path=sample_video_file, size=1024, modified=1234567890.0)
+
+    # Create target and non-target annotations
+    Annotation.create(
+        video_file=video, frame_idx=0, name="dog", class_id=16, confidence=0.8, x1=10.0, y1=20.0, x2=50.0, y2=60.0
+    )
+    Annotation.create(
+        video_file=video, frame_idx=1, name="chair", class_id=56, confidence=0.7, x1=30.0, y1=40.0, x2=70.0, y2=80.0
+    )  # chair is not in COCO_TARGET_LABELS
+
+    objects = get_video_objects(video)
+
+    assert objects == ["dog"]  # chair should be filtered out

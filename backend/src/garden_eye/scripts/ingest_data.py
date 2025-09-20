@@ -2,6 +2,7 @@ from garden_eye.helpers import check_optional_dependency_group
 
 check_optional_dependency_group("ml")
 
+import logging
 import os
 import shutil
 import subprocess
@@ -13,7 +14,6 @@ from ultralytics import YOLO
 
 from garden_eye import DATA_DIR, WEIGHTS_DIR
 from garden_eye.api.database import Annotation, VideoFile, get_thumbnail_path, init_database
-from garden_eye.helpers import is_target_coco_annotation
 from garden_eye.log import get_logger
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -51,15 +51,25 @@ def annotate(video_file: VideoFile) -> None:
         return
     # Process video and collect annotations
     annotations_data = []
-    for frame_idx, result in enumerate(MODEL(str(video_file.path), stream=True, verbose=False)):
+    # Use batch processing with optimized parameters for higher GPU utilization rather than `stream=True`
+    logging.disable(logging.WARNING)
+    results = MODEL(
+        str(video_file.path),
+        stream=False,
+        batch=64,
+        verbose=False,
+        workers=4,
+        device=DEVICE,
+    )
+    logging.disable(logging.NOTSET)
+
+    for frame_idx, result in enumerate(results):
         # Process detection results
         if result.boxes is not None and len(result.boxes) > 0:
             for box in result.boxes:
                 # Skip classes that are not in our set of targets
                 class_id = int(box.cls[0].cpu().numpy())
                 name = MODEL.names[class_id]
-                if not is_target_coco_annotation(name):
-                    continue
                 # Extract bounding box coordinates
                 x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
                 confidence = float(box.conf[0].cpu().numpy())

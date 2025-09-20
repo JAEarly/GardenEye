@@ -7,6 +7,7 @@
 - [x] Fix FPS synchronization issue (annotations don't line up with video frames)
 - [x] Allow filtering of annotation types by clicking on label (and filter at top) - implemented as object class dropdown
 - [x] Filter checkbox of "empty" clips - implemented as "Hide videos with no detections"
+- [x] Add filter for person-only videos - implemented as "Filter out person-only videos" checkbox
 
 ## Data & Analytics
 - [ ] Create video summary page showing detected objects per video
@@ -19,7 +20,7 @@
 - [ ] Experiment with different YOLO model sizes (nano vs small vs medium)
 - [ ] Add support for custom trained models
 - [ ] Implement confidence threshold configuration
-- [ ] Add batch processing improvements for large video sets
+- [x] Add batch processing improvements for large video sets - implemented with batch=64 and optimized parameters
 
 ## Testing & Quality
 - [ ] Add comprehensive tests for annotation functionality
