@@ -8,6 +8,7 @@
 - [x] Allow filtering of annotation types by clicking on label (and filter at top) - implemented as object class dropdown
 - [x] Filter checkbox of "empty" clips - implemented as "Hide videos with no detections"
 - [x] Add filter for person-only videos - implemented as "Filter out person-only videos" checkbox
+- [x] Add video count display in header - shows current filtered video count
 
 ## Data & Analytics
 - [ ] Create video summary page showing detected objects per video
@@ -31,6 +32,7 @@
 - [x] Simplify dependency structure (merged detection into backend)
 - [x] Add video thumbnail generation for faster browsing
 - [x] Combine annotation and thumbnail generation into single ingestion pipeline (ingest_data.py)
+- [x] Move filtering logic to frontend for better performance - removed server-side filter_person parameter
 - [ ] Implement annotation caching/indexing for faster queries
 - [ ] Add progress tracking for long-running annotation jobs
 
