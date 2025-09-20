@@ -52,7 +52,7 @@ uv run python -m garden_eye.scripts.ingest_data
 - `backend/src/garden_eye/api/main.py`: FastAPI application with video streaming endpoints
 - `backend/src/garden_eye/api/database.py`: Peewee ORM models and file discovery logic
 - `backend/src/garden_eye/api/range_stream.py`: HTTP range request handling for efficient video streaming
-- `backend/src/garden_eye/api/log.py`: Centralized logging configuration
+- `backend/src/garden_eye/log.py`: Centralized logging configuration
 - `backend/src/garden_eye/scripts/ingest_data.py`: Combined data ingestion pipeline with YOLO-based object detection, annotation storage, and FFmpeg-based thumbnail generation (filters to target wildlife/people)
 - `backend/src/garden_eye/helpers.py`: Helper functions including `COCO_TARGET_LABELS` for annotation filtering
 - `backend/tests/`: Comprehensive test suite with 90%+ coverage
@@ -68,7 +68,7 @@ uv run python -m garden_eye.scripts.ingest_data
 6. Frontend displays thumbnail previews and can stream videos via HTTP range requests with AI-detected annotations
 
 ### Key API Endpoints
-- `/api/videos`: List all video files with metadata including thumbnail URLs (JSON response)
+- `/api/videos`: List all video files with metadata including thumbnail URLs (JSON response). Supports `filter_person` query parameter to filter out person-only videos
 - `/api/annotations/{vid}`: Get AI-detected annotations for a specific video (filtered to target wildlife/people objects)
 - `/api/thumbnail/{vid}`: Serve thumbnail image for video with caching headers
 - `/stream?vid={id}`: Stream video with HTTP Range support for efficient playback
@@ -108,7 +108,7 @@ The backend uses:
 - `frontend/static/images/`: Logo and branding assets
 - Dark theme UI with video grid displaying thumbnail previews
 - Interactive video selection with expandable player interface
-- Header controls: object class filter dropdown and option to hide videos with no detections
+- Header controls: object class filter dropdown, option to hide videos with no detections, and filter to exclude person-only videos
 - Displays AI-detected object annotations with confidence scores and bounding boxes
 - Focuses on AI detection results without file size indicators or search functionality
 - Uses `/api/videos`, `/api/annotations/{vid}`, `/api/thumbnail/{vid}`, and `/stream` endpoints

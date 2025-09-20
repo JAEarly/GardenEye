@@ -6,10 +6,11 @@ let annotations = [];
 let showAnnotations = true;
 let hideEmpty = false;
 let objectFilter = '';
+let filterPerson = false;
 
 async function init() {
   try {
-    const res = await fetch('/api/videos');
+    const res = await fetch(`/api/videos?filter_person=${filterPerson}`);
     allFiles = await res.json();
     filteredFiles = [...allFiles];
     
@@ -18,6 +19,21 @@ async function init() {
   } catch (error) {
     console.error('Failed to load videos:', error);
     document.getElementById('file-list').innerHTML = '<p>Failed to load videos</p>';
+  }
+}
+
+async function reloadVideos() {
+  try {
+    const res = await fetch(`/api/videos?filter_person=${filterPerson}`);
+    allFiles = await res.json();
+    filteredFiles = [...allFiles];
+    
+    // Reset selected video since the list might have changed
+    selectedVideoId = null;
+    
+    filterFiles();
+  } catch (error) {
+    console.error('Failed to reload videos:', error);
   }
 }
 
@@ -32,6 +48,12 @@ function setupControls() {
   document.getElementById('object-filter').addEventListener('change', (e) => {
     objectFilter = e.target.value;
     filterFiles();
+  });
+  
+  // Filter person checkbox
+  document.getElementById('filter-person').addEventListener('change', (e) => {
+    filterPerson = e.target.checked;
+    reloadVideos();
   });
   
   // Setup video player for annotation overlays

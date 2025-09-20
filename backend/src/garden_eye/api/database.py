@@ -14,6 +14,7 @@ from peewee import (
 )
 
 from garden_eye import DATABASE_PATH, THUMBNAIL_DIR
+from garden_eye.helpers import is_target_coco_annotation
 from garden_eye.log import get_logger
 
 logger = get_logger(__name__)
@@ -61,16 +62,19 @@ def init_database(db_path: Path = DATABASE_PATH) -> SqliteDatabase:
     return db
 
 
-def get_video_objects(video_file: VideoFile) -> list[str]:
+def get_video_objects(video_file: VideoFile, filter_person: bool = False) -> list[str]:
     """Gets the list of unique objects in a particular video, ordered by frequency, e.g. `("dog", "cat", "person")`."""
     # Use SQL aggregation to count annotations by object name and sort by frequency
-    objects = (
+    objs = (
         Annotation.select(Annotation.name, fn.COUNT().alias("count"))
         .where(Annotation.video_file == video_file)
         .group_by(Annotation.name)
         .order_by(fn.COUNT().desc())
     )
-    return [obj.name for obj in objects]
+    obj_names = [obj.name for obj in objs if is_target_coco_annotation(obj.name)]
+    if filter_person and obj_names == ["person"]:
+        return []
+    return obj_names
 
 
 def get_thumbnail_path(video_file: VideoFile) -> Path:
