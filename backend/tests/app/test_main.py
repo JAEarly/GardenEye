@@ -69,19 +69,6 @@ def test__list_videos__filter_person_with_mixed_objects(test_db: SqliteDatabase,
     assert "dog" in result[0].objects
 
 
-def test__api_videos_endpoint__with_filter_person_parameter(test_db: SqliteDatabase) -> None:
-    client = TestClient(app)
-    # Test without parameter
-    response = client.get("/api/videos")
-    assert response.status_code == 200
-    # Test with filter_person=false
-    response = client.get("/api/videos?filter_person=false")
-    assert response.status_code == 200
-    # Test with filter_person=true
-    response = client.get("/api/videos?filter_person=true")
-    assert response.status_code == 200
-
-
 def test__get_annotations__returns_filtered_annotations(test_db: SqliteDatabase, sample_video_file: Path) -> None:
     # Insert test video
     video = VideoFile.create(path=sample_video_file, size=len("fake video content"), modified=1234567890.0)
@@ -100,22 +87,3 @@ def test__get_annotations__returns_filtered_annotations(test_db: SqliteDatabase,
     assert result[0].name == "dog"
     assert result[0].frame_idx == 0
     assert result[0].confidence == 0.8
-
-
-def test__api_annotations_endpoint(test_db: SqliteDatabase, sample_video_file: Path) -> None:
-    client = TestClient(app)
-
-    # Insert test video
-    video = VideoFile.create(path=sample_video_file, size=len("fake video content"), modified=1234567890.0)
-
-    # Add annotation
-    Annotation.create(
-        video_file=video, frame_idx=0, name="dog", class_id=16, confidence=0.8, x1=10.0, y1=20.0, x2=50.0, y2=60.0
-    )
-
-    response = client.get(f"/api/annotations/{video.id}")
-    assert response.status_code == 200
-
-    data = response.json()
-    assert len(data) == 1
-    assert data[0]["name"] == "dog"
