@@ -50,7 +50,6 @@ select = [
     "C4",  # flake8-comprehensions
 ]
 ignore = [
-    "E402",  # imports at top of file
     "S101",  # assert (OK in tests)
     "S603",  # subprocess call (needed for ffmpeg)
 ]
