@@ -1,7 +1,3 @@
-from garden_eye.helpers import check_optional_dependency_group
-
-check_optional_dependency_group("ml")
-
 import logging
 import os
 import shutil
