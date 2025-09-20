@@ -12,15 +12,11 @@ dependencies = [
     "uvicorn>=0.35.0",
 ]
 
-[project.optional-dependencies]
-ml = [
+[dependency-groups]
+dev = [
     "opencv-python>=4.11.0.86",
     "opencv-python-headless>=4.12.0.88",
     "ultralytics>=8.3.195",
-]
-
-[dependency-groups]
-dev = [
     "mypy>=1.17.1",
     "ruff>=0.12.10",
     "types-peewee>=3.18.2.20250710",
@@ -54,7 +50,6 @@ select = [
     "C4",  # flake8-comprehensions
 ]
 ignore = [
-    "E402",  # imports at top of file
     "S101",  # assert (OK in tests)
     "S603",  # subprocess call (needed for ffmpeg)
 ]
