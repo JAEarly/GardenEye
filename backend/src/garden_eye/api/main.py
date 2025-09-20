@@ -80,7 +80,7 @@ def index() -> FileResponse:
 
 
 @app.get("/api/videos")
-def list_videos(filter_person: bool = False) -> list[VideoOut]:
+def list_videos() -> list[VideoOut]:
     """Return a flat list of video files from the database."""
     items: list[VideoOut] = []
     # Query the DB and order by path for stable output
@@ -90,7 +90,7 @@ def list_videos(filter_person: bool = False) -> list[VideoOut]:
                 vid=vf.id,
                 name=vf.path.name,
                 size=int(vf.size),
-                objects=get_video_objects(vf, filter_person=filter_person),
+                objects=get_video_objects(vf),
                 thumbnail_url=f"/api/thumbnail/{vf.id}",
             )
         )

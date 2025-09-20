@@ -10,11 +10,12 @@ let filterPerson = false;
 
 async function init() {
   try {
-    const res = await fetch(`/api/videos?filter_person=${filterPerson}`);
+    const res = await fetch('/api/videos');
     allFiles = await res.json();
     filteredFiles = [...allFiles];
     
     setupControls();
+    updateVideoCount();
     renderView();
   } catch (error) {
     console.error('Failed to load videos:', error);
@@ -22,20 +23,6 @@ async function init() {
   }
 }
 
-async function reloadVideos() {
-  try {
-    const res = await fetch(`/api/videos?filter_person=${filterPerson}`);
-    allFiles = await res.json();
-    filteredFiles = [...allFiles];
-    
-    // Reset selected video since the list might have changed
-    selectedVideoId = null;
-    
-    filterFiles();
-  } catch (error) {
-    console.error('Failed to reload videos:', error);
-  }
-}
 
 function setupControls() {
   // Hide empty videos toggle
@@ -53,7 +40,7 @@ function setupControls() {
   // Filter person checkbox
   document.getElementById('filter-person').addEventListener('change', (e) => {
     filterPerson = e.target.checked;
-    reloadVideos();
+    filterFiles();
   });
   
   // Setup video player for annotation overlays
@@ -63,6 +50,17 @@ function setupControls() {
 
 function filterFiles() {
   filteredFiles = [...allFiles];
+  
+  // Filter out person-only videos if requested
+  if (filterPerson) {
+    filteredFiles = filteredFiles.filter(file => {
+      if (!file.objects || file.objects.length === 0) {
+        return true; // Keep empty videos
+      }
+      // Keep videos that have objects other than just "person"
+      return file.objects.length > 1 || !file.objects.includes('person');
+    });
+  }
   
   // Filter by empty videos if requested
   if (hideEmpty) {
@@ -78,7 +76,14 @@ function filterFiles() {
     );
   }
   
+  updateVideoCount();
   renderView();
+}
+
+function updateVideoCount() {
+  const count = filteredFiles.length;
+  const videoCountElement = document.getElementById('video-count');
+  videoCountElement.textContent = `${count} video${count !== 1 ? 's' : ''}`;
 }
 
 function renderView() {
