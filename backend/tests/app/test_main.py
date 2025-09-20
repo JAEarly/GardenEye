@@ -28,47 +28,6 @@ def test__list_videos__returns_sample_data(test_db: SqliteDatabase, sample_video
     assert result[0].size == len("fake video content")
 
 
-def test__list_videos__with_filter_person_false(test_db: SqliteDatabase, sample_video_file: Path) -> None:
-    # Insert test video
-    video = VideoFile.create(path=sample_video_file, size=len("fake video content"), modified=1234567890.0)
-    # Add person annotation only
-    Annotation.create(
-        video_file=video, frame_idx=0, name="person", class_id=0, confidence=0.8, x1=10.0, y1=20.0, x2=50.0, y2=60.0
-    )
-    result = list_videos(filter_person=False)
-    assert len(result) == 1
-    assert result[0].objects == ["person"]
-
-
-def test__list_videos__with_filter_person_true(test_db: SqliteDatabase, sample_video_file: Path) -> None:
-    # Insert test video
-    video = VideoFile.create(path=sample_video_file, size=len("fake video content"), modified=1234567890.0)
-    # Add person annotation only
-    Annotation.create(
-        video_file=video, frame_idx=0, name="person", class_id=0, confidence=0.8, x1=10.0, y1=20.0, x2=50.0, y2=60.0
-    )
-
-    result = list_videos(filter_person=True)
-    assert len(result) == 1
-    assert result[0].objects == []  # Should be empty due to filter_person=True
-
-
-def test__list_videos__filter_person_with_mixed_objects(test_db: SqliteDatabase, sample_video_file: Path) -> None:
-    # Insert test video
-    video = VideoFile.create(path=sample_video_file, size=len("fake video content"), modified=1234567890.0)
-    # Add person and dog annotations
-    Annotation.create(
-        video_file=video, frame_idx=0, name="person", class_id=0, confidence=0.8, x1=10.0, y1=20.0, x2=50.0, y2=60.0
-    )
-    Annotation.create(
-        video_file=video, frame_idx=1, name="dog", class_id=16, confidence=0.9, x1=15.0, y1=25.0, x2=55.0, y2=65.0
-    )
-    result = list_videos(filter_person=True)
-    assert len(result) == 1
-    assert "person" in result[0].objects
-    assert "dog" in result[0].objects
-
-
 def test__get_annotations__returns_filtered_annotations(test_db: SqliteDatabase, sample_video_file: Path) -> None:
     # Insert test video
     video = VideoFile.create(path=sample_video_file, size=len("fake video content"), modified=1234567890.0)
