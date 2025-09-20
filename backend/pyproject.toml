@@ -72,7 +72,7 @@ asyncio_mode = "auto"
 
 [tool.coverage.run]
 source = ["src"]
-omit = ["*/tests/*"]
+omit = ["*/tests/*", "*/scripts/*"]
 
 [tool.creosote]
 exclude-deps = [

@@ -1,4 +1,8 @@
+from collections.abc import Iterable
+
 from matplotlib import pyplot as plt
+from matplotlib.animation import FuncAnimation
+from matplotlib.artist import Artist
 
 from garden_eye.api.database import Annotation, VideoFile, init_database
 from garden_eye.helpers import WILDLIFE_COCO_LABELS, is_target_coco_annotation
@@ -12,39 +16,77 @@ def run() -> None:
     # Set up dark theme styling to match frontend
     plt.style.use("dark_background")
 
-    scale = 0.6
-    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(9 * scale, 16 * scale))
-    fig.patch.set_facecolor("#0b0c10")  # Match frontend background
+    # Set up the figure
+    fig, ax = plt.subplots(figsize=(6, 4))
+    fig.patch.set_facecolor("#0b0c10")
+    ax.set_facecolor("#0b0c10")
+    ax.axis("equal")
 
     # Define colors to match frontend theme
-    colors = ["#30363d", "#4d5a6e", "#238636"]  # Green, gray-blue, dark gray
+    colors = ["#30363d", "#4d5a6e", "#238636"]
 
-    # Video distribution pie chart
-    axes[1].pie(
-        video_dist.values(),
-        labels=video_dist.keys(),
-        autopct="%1.1f%%",
-        colors=colors[: len(video_dist)],
-        textprops={"color": "#e6e6e6", "fontsize": 10},
-        startangle=0,
-    )
-    axes[1].set_title("Video Distribution", color="#e6e6e6", fontsize=12, pad=0)
-    axes[1].set_facecolor("#0b0c10")
+    # Ensure both distributions have the same keys in the same order
+    all_keys = ["Other", "Person", "Wildlife"]
+    annotation_values = [float(annotation_dist.get(key, 0)) for key in all_keys]
+    video_values = [float(video_dist.get(key, 0)) for key in all_keys]
 
-    # Annotation distribution pie chart
-    axes[0].pie(
-        annotation_dist.values(),
-        labels=annotation_dist.keys(),
-        autopct="%1.1f%%",
-        colors=colors[: len(annotation_dist)],
-        textprops={"color": "#e6e6e6", "fontsize": 10},
-        startangle=0,
-    )
-    axes[0].set_title("Annotation Distribution", color="#e6e6e6", fontsize=12, pad=0)
-    axes[0].set_facecolor("#0b0c10")
+    # Animation variables
+    pause_frames = 60  # 1 second pause at start
+    transition_frames = 120  # 2 seconds transition
+    end_pause_frames = 60  # 1 second pause at end
+    total_frames = pause_frames + transition_frames + end_pause_frames
+
+    def animate(frame: int) -> Iterable[Artist]:
+        ax.clear()
+        ax.set_facecolor("#0b0c10")
+        ax.axis("equal")
+
+        if frame < pause_frames:
+            # Show annotation distribution
+            values = annotation_values
+            title = "Annotations"
+        elif frame < pause_frames + transition_frames:
+            # Animate transition
+            progress = (frame - pause_frames) / transition_frames
+            # Cubic ease-in-out transition (slow-fast-slow)
+            if progress < 0.5:
+                title = "Annotations"
+                # Ease in: slow start
+                t = 4 * progress * progress * progress
+            else:
+                title = "Videos" if progress > 0.95 else "Annotations"
+                # Ease out: slow end
+                p = 2 * progress - 2
+                t = 1 + p * p * p * 4
+            values = [
+                ann_val * (1 - t) + vid_val * t
+                for ann_val, vid_val in zip(annotation_values, video_values, strict=False)
+            ]
+        else:
+            # Show video distribution (hold at end)
+            values = video_values
+            title = "Videos"
+
+        # Only plot if we have non-zero values
+        if sum(values) > 0:
+            ax.pie(
+                values,
+                labels=all_keys,
+                autopct="%1.1f%%",
+                colors=colors[: len(all_keys)],
+                textprops={"color": "#e6e6e6", "fontsize": 10},
+                startangle=0,
+            )
+
+        # Ensure title is always visible
+        ax.set_title(title, color="#e6e6e6", fontsize=14)
+        return []
+
+    # Create animation
+    anim = FuncAnimation(fig, animate, frames=total_frames, interval=33, repeat=True, blit=False)  # noqa: F841
 
     plt.tight_layout()
-    plt.subplots_adjust(hspace=0.35, top=0.92, bottom=0.04)  # Increase space between subplots
+    plt.subplots_adjust(bottom=0, top=0.89)
     plt.show()
 
 
@@ -83,7 +125,7 @@ def get_video_distribution() -> dict[str, int]:
     none_count = total_count - wildlife - person_only_count
 
     return {
-        "None": none_count,
+        "Other": none_count,
         "Person": person_only_count,
         "Wildlife": wildlife,
     }
