@@ -35,6 +35,7 @@ class VideoFile(Model):
     modified = FloatField()  # Modification time in seconds
     annotated = BooleanField(default=False)  # Whether annotations have been processed
     is_night = BooleanField(default=False)  # Whether this video is a night-time (black-and-white) recording
+    wildlife_prop = FloatField(default=0)  # The proportion of frames that contain a wildlife annotation
 
 
 class Annotation(Model):
