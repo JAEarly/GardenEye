@@ -10,6 +10,7 @@ from ultralytics import YOLO
 
 from garden_eye import DATA_DIR, WEIGHTS_DIR
 from garden_eye.api.database import Annotation, VideoFile, get_thumbnail_path, init_database
+from garden_eye.helpers import is_night_video
 from garden_eye.log import get_logger
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -29,6 +30,9 @@ def run() -> None:
     for vf in tqdm(VideoFile.select().order_by(VideoFile.path), desc="Ingesting files"):
         annotate(vf)
         create_thumbnail(vf)
+        # Update whether this is a night video or not (requires thumbnail)
+        vf.is_night = is_night_video(vf)
+        vf.save()
 
 
 def add_files() -> None:
