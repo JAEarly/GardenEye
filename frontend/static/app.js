@@ -64,14 +64,14 @@ function setupControls() {
 function filterFiles() {
   filteredFiles = [...allFiles];
   
-  // Filter out person-only videos if requested
+  // Filter out videos with person if requested
   if (filterPerson) {
     filteredFiles = filteredFiles.filter(file => {
       if (!file.objects || file.objects.length === 0) {
         return true; // Keep empty videos
       }
-      // Keep videos that have objects other than just "person"
-      return file.objects.length > 1 || !file.objects.includes('person');
+      // Keep videos that don't have "person"
+      return !file.objects.includes('person');
     });
   }
   
