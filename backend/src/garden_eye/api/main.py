@@ -42,6 +42,7 @@ class VideoOut(BaseModel):
     modified: float | None = None
     objects: list[str] = []
     thumbnail_url: str
+    is_night: bool = False
 
 
 class AnnotationOut(BaseModel):
@@ -92,6 +93,7 @@ def list_videos() -> list[VideoOut]:
                 size=int(vf.size),
                 objects=get_video_objects(vf),
                 thumbnail_url=f"/api/thumbnail/{vf.id}",
+                is_night=vf.is_night,
             )
         )
     return items

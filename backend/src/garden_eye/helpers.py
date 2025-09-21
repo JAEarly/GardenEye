@@ -1,7 +1,8 @@
+from pathlib import Path
+
 import numpy as np
 from PIL import Image
 
-from garden_eye.api.database import VideoFile, get_thumbnail_path
 from garden_eye.log import get_logger
 
 logger = get_logger(__name__)
@@ -26,18 +27,17 @@ def is_target_coco_annotation(label: str) -> bool:
     return label in WILDLIFE_COCO_LABELS.values()
 
 
-def is_night_video(video_file: VideoFile, tolerance: float = 2.0) -> bool:
+def is_night_video(thumbnail_path: Path, tolerance: float = 2.0) -> bool:
     """
     Detects if a video is from night mode (typically grayscale with IR illumination).
 
     Args:
-        video_file: VideoFile instance from the database
+        thumbnail_path: Path to video thumbnail.
         tolerance: Maximum allowed difference between RGB channels to consider grayscale
 
     Returns:
         True if the video appears to be a night/IR recording
     """
-    thumbnail_path = get_thumbnail_path(video_file)
     thumbnail = np.asarray(Image.open(thumbnail_path))
     mean_rgb = thumbnail.mean(axis=(0, 1))
 

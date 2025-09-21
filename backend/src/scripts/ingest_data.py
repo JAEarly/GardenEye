@@ -30,9 +30,6 @@ def run() -> None:
     for vf in tqdm(VideoFile.select().order_by(VideoFile.path), desc="Ingesting files"):
         annotate(vf)
         create_thumbnail(vf)
-        # Update whether this is a night video or not (requires thumbnail)
-        vf.is_night = is_night_video(vf)
-        vf.save()
 
 
 def add_files() -> None:
@@ -123,6 +120,9 @@ def create_thumbnail(video_file: VideoFile, seconds: int = 1) -> None:
         os.fspath(thumbnail_path),
     ]
     subprocess.run(command, capture_output=True, text=True, check=True)
+    # Update whether this is a night video or not (requires thumbnail)
+    video_file.is_night = is_night_video(thumbnail_path)  # type: ignore[assignment]
+    video_file.save()
 
 
 if __name__ == "__main__":

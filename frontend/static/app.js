@@ -7,6 +7,7 @@ let showAnnotations = true;
 let hideEmpty = false;
 let objectFilter = '';
 let filterPerson = false;
+let timeFilter = '';
 
 async function init() {
   try {
@@ -34,6 +35,12 @@ function setupControls() {
   // Object filter dropdown
   document.getElementById('object-filter').addEventListener('change', (e) => {
     objectFilter = e.target.value;
+    filterFiles();
+  });
+  
+  // Time filter dropdown
+  document.getElementById('time-filter').addEventListener('change', (e) => {
+    timeFilter = e.target.value;
     filterFiles();
   });
   
@@ -74,6 +81,18 @@ function filterFiles() {
     filteredFiles = filteredFiles.filter(file => 
       file.objects && file.objects.includes(objectFilter)
     );
+  }
+  
+  // Filter by day/night if specified
+  if (timeFilter) {
+    filteredFiles = filteredFiles.filter(file => {
+      if (timeFilter === 'day') {
+        return !file.is_night;
+      } else if (timeFilter === 'night') {
+        return file.is_night;
+      }
+      return true; // 'day + night' or empty shows all
+    });
   }
   
   updateVideoCount();
