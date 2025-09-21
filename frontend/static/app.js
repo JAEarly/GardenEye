@@ -622,6 +622,8 @@ function resizeCanvas() {
   const canvas = document.getElementById('annotation-overlay');
   const container = document.querySelector('.video-container');
   
+  if (!player || !canvas) return;
+  
   // Check if we're in fullscreen mode
   const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || 
                          document.mozFullScreenElement || document.msFullscreenElement);
@@ -633,7 +635,7 @@ function resizeCanvas() {
     canvas.style.width = '100vw';
     canvas.style.height = '100vh';
   } else {
-    // Normal mode, match video dimensions
+    // Normal mode, match the displayed video container dimensions exactly
     canvas.width = player.offsetWidth;
     canvas.height = player.offsetHeight;
     canvas.style.width = '100%';
@@ -657,7 +659,7 @@ function drawAnnotations(time) {
   // Clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   
-  if (!showAnnotations || annotations.length === 0 || player.paused) {
+  if (!showAnnotations || annotations.length === 0 || player.paused || !player.videoWidth || !player.videoHeight) {
     return;
   }
 
@@ -673,16 +675,36 @@ function drawAnnotations(time) {
       }
     }
   }
-  const currentFrame = Math.floor(time * fps);
+  const currentFrame = Math.floor((time || player.currentTime) * fps);
   
   // Get annotations for current frame
   let frameAnnotations = annotations.filter(ann => ann.frame_idx === currentFrame);
   
   if (frameAnnotations.length === 0) return;
   
-  // Calculate scaling factors
-  const scaleX = canvas.width / player.videoWidth;
-  const scaleY = canvas.height / player.videoHeight;
+  // Calculate the actual video display area within the canvas considering object-fit: contain
+  const videoAspectRatio = player.videoWidth / player.videoHeight;
+  const canvasAspectRatio = canvas.width / canvas.height;
+  
+  let displayedVideoWidth, displayedVideoHeight, offsetX, offsetY;
+  
+  if (videoAspectRatio > canvasAspectRatio) {
+    // Video is wider than canvas - letterboxed top/bottom
+    displayedVideoWidth = canvas.width;
+    displayedVideoHeight = canvas.width / videoAspectRatio;
+    offsetX = 0;
+    offsetY = (canvas.height - displayedVideoHeight) / 2;
+  } else {
+    // Video is taller than canvas - letterboxed left/right
+    displayedVideoWidth = canvas.height * videoAspectRatio;
+    displayedVideoHeight = canvas.height;
+    offsetX = (canvas.width - displayedVideoWidth) / 2;
+    offsetY = 0;
+  }
+  
+  // Calculate scaling factors based on the actual displayed video area
+  const scaleX = displayedVideoWidth / player.videoWidth;
+  const scaleY = displayedVideoHeight / player.videoHeight;
   
   // Draw bounding boxes
   ctx.strokeStyle = '#00ff00';
@@ -691,26 +713,36 @@ function drawAnnotations(time) {
   ctx.fillStyle = '#00ff00';
   
   frameAnnotations.forEach(ann => {
-    const x = ann.x1 * scaleX;
-    const y = ann.y1 * scaleY;
+    // Apply scaling and offset to annotation coordinates
+    const x = ann.x1 * scaleX + offsetX;
+    const y = ann.y1 * scaleY + offsetY;
     const width = (ann.x2 - ann.x1) * scaleX;
     const height = (ann.y2 - ann.y1) * scaleY;
     
-    // Draw bounding box
-    ctx.strokeRect(x, y, width, height);
-    
-    // Draw label background
-    const label = `${ann.name} (${(ann.confidence * 100).toFixed(1)}%)`;
-    const labelWidth = ctx.measureText(label).width + 8;
-    const labelHeight = 20;
-    
-    ctx.fillStyle = '#00ff00';
-    ctx.fillRect(x, y - labelHeight, labelWidth, labelHeight);
-    
-    // Draw label text
-    ctx.fillStyle = '#000000';
-    ctx.fillText(label, x + 4, y - 6);
-    ctx.fillStyle = '#00ff00';
+    // Ensure annotation is within the visible video area
+    if (x + width > offsetX && x < offsetX + displayedVideoWidth && 
+        y + height > offsetY && y < offsetY + displayedVideoHeight) {
+      
+      // Draw bounding box
+      ctx.strokeRect(x, y, width, height);
+      
+      // Draw label background
+      const label = `${ann.name} (${(ann.confidence * 100).toFixed(1)}%)`;
+      const labelWidth = ctx.measureText(label).width + 8;
+      const labelHeight = 20;
+      
+      // Position label within visible area
+      const labelX = Math.max(offsetX, Math.min(x, offsetX + displayedVideoWidth - labelWidth));
+      const labelY = Math.max(offsetY + labelHeight, y);
+      
+      ctx.fillStyle = '#00ff00';
+      ctx.fillRect(labelX, labelY - labelHeight, labelWidth, labelHeight);
+      
+      // Draw label text
+      ctx.fillStyle = '#000000';
+      ctx.fillText(label, labelX + 4, labelY - 6);
+      ctx.fillStyle = '#00ff00';
+    }
   });
 }
 
