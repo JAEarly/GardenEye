@@ -10,7 +10,7 @@ from ultralytics import YOLO
 
 from garden_eye import DATA_DIR, WEIGHTS_DIR
 from garden_eye.api.database import Annotation, VideoFile, get_thumbnail_path, init_database
-from garden_eye.helpers import is_night_video
+from garden_eye.helpers import is_night_video, is_target_coco_annotation
 from garden_eye.log import get_logger
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -60,16 +60,19 @@ def annotate(video_file: VideoFile) -> None:
     )
     logging.disable(logging.NOTSET)
 
+    wildlife_frames = set()
     for frame_idx, result in enumerate(results):
         # Process detection results
         if result.boxes is not None and len(result.boxes) > 0:
             for box in result.boxes:
-                # Skip classes that are not in our set of targets
                 class_id = int(box.cls[0].cpu().numpy())
                 name = MODEL.names[class_id]
                 # Extract bounding box coordinates
                 x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
                 confidence = float(box.conf[0].cpu().numpy())
+                # Add frame to set that contains wildlife
+                if is_target_coco_annotation(name):
+                    wildlife_frames.add(frame_idx)
                 # Collect
                 annotations_data.append(
                     {
@@ -89,6 +92,8 @@ def annotate(video_file: VideoFile) -> None:
         with Annotation._meta.database.atomic():  # type: ignore[attr-defined]
             for batch in chunked(annotations_data, 50):  # pick size based on column count
                 Annotation.insert_many(batch).execute()
+    # Add proportion of annotations that are wildlife matches
+    video_file.wildlife_prop = len(wildlife_frames) / len(results)  # type: ignore[assignment]
     # Mark video as annotated (even if no detections were found)
     video_file.annotated = True  # type: ignore[assignment]
     video_file.save()

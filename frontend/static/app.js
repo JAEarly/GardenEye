@@ -1,6 +1,6 @@
 let allFiles = [];
 let filteredFiles = [];
-let currentSort = { column: 'name', direction: 'asc' };
+let currentSort = 'oldest';
 let selectedVideoId = null;
 let annotations = [];
 let showAnnotations = true;
@@ -17,7 +17,7 @@ async function init() {
     
     setupControls();
     updateVideoCount();
-    renderView();
+    sortAndRenderFiles();
   } catch (error) {
     console.error('Failed to load videos:', error);
     document.getElementById('file-list').innerHTML = '<p>Failed to load videos</p>';
@@ -50,6 +50,12 @@ function setupControls() {
     filterFiles();
   });
   
+  // Sort by dropdown
+  document.getElementById('sort-by').addEventListener('change', (e) => {
+    currentSort = e.target.value;
+    sortAndRenderFiles();
+  });
+  
   // Setup video player for annotation overlays
   setupVideoPlayer();
 }
@@ -58,14 +64,14 @@ function setupControls() {
 function filterFiles() {
   filteredFiles = [...allFiles];
   
-  // Filter out person-only videos if requested
+  // Filter out videos with person if requested
   if (filterPerson) {
     filteredFiles = filteredFiles.filter(file => {
       if (!file.objects || file.objects.length === 0) {
         return true; // Keep empty videos
       }
-      // Keep videos that have objects other than just "person"
-      return file.objects.length > 1 || !file.objects.includes('person');
+      // Keep videos that don't have "person"
+      return !file.objects.includes('person');
     });
   }
   
@@ -96,7 +102,7 @@ function filterFiles() {
   }
   
   updateVideoCount();
-  renderView();
+  sortAndRenderFiles();
 }
 
 function updateVideoCount() {
@@ -181,13 +187,6 @@ function createPlaceholderCard(file) {
   
   const header = document.createElement('div');
   header.className = 'card-header';
-  
-  const title = document.createElement('h3');
-  title.className = 'card-title';
-  title.textContent = file.name;
-  title.title = file.name;
-
-  header.appendChild(title);
 
   const meta = document.createElement('div');
   meta.className = 'card-meta';
@@ -232,16 +231,33 @@ function createCollapsedCard(file, card) {
   
   const header = document.createElement('div');
   header.className = 'card-header';
-  
-  const title = document.createElement('h3');
-  title.className = 'card-title';
-  title.textContent = file.name;
-  title.title = file.name; // Tooltip for long names
-
-  header.appendChild(title);
 
   const meta = document.createElement('div');
   meta.className = 'card-meta';
+  
+  // Add metadata info
+  const metaInfo = document.createElement('div');
+  metaInfo.className = 'card-meta-info';
+  
+  // Modified date
+  const modifiedSpan = document.createElement('span');
+  modifiedSpan.className = 'meta-item';
+  if (file.modified) {
+    const date = new Date(file.modified * 1000);
+    modifiedSpan.textContent = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+  } else {
+    modifiedSpan.textContent = 'Unknown date';
+  }
+  metaInfo.appendChild(modifiedSpan);
+  
+  // Wildlife proportion
+  const wildlifeSpan = document.createElement('span');
+  wildlifeSpan.className = 'meta-item';
+  const proportion = file.wildlife_prop || 0;
+  wildlifeSpan.textContent = `${(proportion * 100).toFixed(1)}% wildlife`;
+  metaInfo.appendChild(wildlifeSpan);
+  
+  meta.appendChild(metaInfo);
   
   // Add objects container
   const objectsContainer = document.createElement('div');
@@ -293,13 +309,32 @@ function createExpandedCard(file) {
   const info = document.createElement('div');
   info.className = 'card-info';
   
-  const title = document.createElement('h3');
-  title.className = 'card-title';
-  title.textContent = file.name;
-  title.title = file.name;
-  
   const meta = document.createElement('div');
   meta.className = 'card-meta';
+  
+  // Add metadata info for expanded view
+  const metaInfo = document.createElement('div');
+  metaInfo.className = 'card-meta-info';
+  
+  // Modified date
+  const modifiedSpan = document.createElement('span');
+  modifiedSpan.className = 'meta-item';
+  if (file.modified) {
+    const date = new Date(file.modified * 1000);
+    modifiedSpan.textContent = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+  } else {
+    modifiedSpan.textContent = 'Unknown';
+  }
+  metaInfo.appendChild(modifiedSpan);
+  
+  // Wildlife proportion
+  const wildlifeSpan = document.createElement('span');
+  wildlifeSpan.className = 'meta-item';
+  const proportion = file.wildlife_prop || 0;
+  wildlifeSpan.textContent = `Wildlife Activity: ${(proportion * 100).toFixed(1)}%`;
+  metaInfo.appendChild(wildlifeSpan);
+  
+  meta.appendChild(metaInfo);
   
   // Add objects container for expanded view
   const objectsContainer = document.createElement('div');
@@ -307,7 +342,6 @@ function createExpandedCard(file) {
   displayVideoObjects(file.objects, objectsContainer);
   meta.appendChild(objectsContainer);
   
-  info.appendChild(title);
   info.appendChild(meta);
   
   // Controls
@@ -346,27 +380,19 @@ function createExpandedCard(file) {
   return card;
 }
 
-function sortFiles(column) {
-  if (currentSort.column === column) {
-    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-  } else {
-    currentSort.column = column;
-    currentSort.direction = 'asc';
-  }
-  
+function sortAndRenderFiles() {
   filteredFiles.sort((a, b) => {
-    let valueA = a[column];
-    let valueB = b[column];
-    
-    if (column === 'name') {
-      valueA = valueA.toLowerCase();
-      valueB = valueB.toLowerCase();
-    }
-    
-    if (currentSort.direction === 'asc') {
-      return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
-    } else {
-      return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+    switch (currentSort) {
+      case 'latest':
+        return (b.modified || 0) - (a.modified || 0);
+      case 'oldest':
+        return (a.modified || 0) - (b.modified || 0);
+      case 'most_activity':
+        return (b.wildlife_prop || 0) - (a.wildlife_prop || 0);
+      case 'least_activity':
+        return (a.wildlife_prop || 0) - (b.wildlife_prop || 0);
+      default:
+        return (a.modified || 0) - (b.modified || 0);
     }
   });
   
@@ -596,6 +622,8 @@ function resizeCanvas() {
   const canvas = document.getElementById('annotation-overlay');
   const container = document.querySelector('.video-container');
   
+  if (!player || !canvas) return;
+  
   // Check if we're in fullscreen mode
   const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || 
                          document.mozFullScreenElement || document.msFullscreenElement);
@@ -607,7 +635,7 @@ function resizeCanvas() {
     canvas.style.width = '100vw';
     canvas.style.height = '100vh';
   } else {
-    // Normal mode, match video dimensions
+    // Normal mode, match the displayed video container dimensions exactly
     canvas.width = player.offsetWidth;
     canvas.height = player.offsetHeight;
     canvas.style.width = '100%';
@@ -631,7 +659,7 @@ function drawAnnotations(time) {
   // Clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   
-  if (!showAnnotations || annotations.length === 0 || player.paused) {
+  if (!showAnnotations || annotations.length === 0 || player.paused || !player.videoWidth || !player.videoHeight) {
     return;
   }
 
@@ -647,16 +675,36 @@ function drawAnnotations(time) {
       }
     }
   }
-  const currentFrame = Math.floor(time * fps);
+  const currentFrame = Math.floor((time || player.currentTime) * fps);
   
   // Get annotations for current frame
   let frameAnnotations = annotations.filter(ann => ann.frame_idx === currentFrame);
   
   if (frameAnnotations.length === 0) return;
   
-  // Calculate scaling factors
-  const scaleX = canvas.width / player.videoWidth;
-  const scaleY = canvas.height / player.videoHeight;
+  // Calculate the actual video display area within the canvas considering object-fit: contain
+  const videoAspectRatio = player.videoWidth / player.videoHeight;
+  const canvasAspectRatio = canvas.width / canvas.height;
+  
+  let displayedVideoWidth, displayedVideoHeight, offsetX, offsetY;
+  
+  if (videoAspectRatio > canvasAspectRatio) {
+    // Video is wider than canvas - letterboxed top/bottom
+    displayedVideoWidth = canvas.width;
+    displayedVideoHeight = canvas.width / videoAspectRatio;
+    offsetX = 0;
+    offsetY = (canvas.height - displayedVideoHeight) / 2;
+  } else {
+    // Video is taller than canvas - letterboxed left/right
+    displayedVideoWidth = canvas.height * videoAspectRatio;
+    displayedVideoHeight = canvas.height;
+    offsetX = (canvas.width - displayedVideoWidth) / 2;
+    offsetY = 0;
+  }
+  
+  // Calculate scaling factors based on the actual displayed video area
+  const scaleX = displayedVideoWidth / player.videoWidth;
+  const scaleY = displayedVideoHeight / player.videoHeight;
   
   // Draw bounding boxes
   ctx.strokeStyle = '#00ff00';
@@ -665,26 +713,36 @@ function drawAnnotations(time) {
   ctx.fillStyle = '#00ff00';
   
   frameAnnotations.forEach(ann => {
-    const x = ann.x1 * scaleX;
-    const y = ann.y1 * scaleY;
+    // Apply scaling and offset to annotation coordinates
+    const x = ann.x1 * scaleX + offsetX;
+    const y = ann.y1 * scaleY + offsetY;
     const width = (ann.x2 - ann.x1) * scaleX;
     const height = (ann.y2 - ann.y1) * scaleY;
     
-    // Draw bounding box
-    ctx.strokeRect(x, y, width, height);
-    
-    // Draw label background
-    const label = `${ann.name} (${(ann.confidence * 100).toFixed(1)}%)`;
-    const labelWidth = ctx.measureText(label).width + 8;
-    const labelHeight = 20;
-    
-    ctx.fillStyle = '#00ff00';
-    ctx.fillRect(x, y - labelHeight, labelWidth, labelHeight);
-    
-    // Draw label text
-    ctx.fillStyle = '#000000';
-    ctx.fillText(label, x + 4, y - 6);
-    ctx.fillStyle = '#00ff00';
+    // Ensure annotation is within the visible video area
+    if (x + width > offsetX && x < offsetX + displayedVideoWidth && 
+        y + height > offsetY && y < offsetY + displayedVideoHeight) {
+      
+      // Draw bounding box
+      ctx.strokeRect(x, y, width, height);
+      
+      // Draw label background
+      const label = `${ann.name} (${(ann.confidence * 100).toFixed(1)}%)`;
+      const labelWidth = ctx.measureText(label).width + 8;
+      const labelHeight = 20;
+      
+      // Position label within visible area
+      const labelX = Math.max(offsetX, Math.min(x, offsetX + displayedVideoWidth - labelWidth));
+      const labelY = Math.max(offsetY + labelHeight, y);
+      
+      ctx.fillStyle = '#00ff00';
+      ctx.fillRect(labelX, labelY - labelHeight, labelWidth, labelHeight);
+      
+      // Draw label text
+      ctx.fillStyle = '#000000';
+      ctx.fillText(label, labelX + 4, labelY - 6);
+      ctx.fillStyle = '#00ff00';
+    }
   });
 }
 

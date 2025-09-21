@@ -35,19 +35,26 @@
         <option value="zebra">Zebra</option>
         <option value="giraffe">Giraffe</option>
       </select>
-      
+
+      <select id="sort-by">
+        <option value="oldest">Oldest</option>
+        <option value="latest">Latest</option>
+        <option value="most_activity">Most Activity</option>
+        <option value="least_activity">Least Activity</option>
+      </select>
+
       <select id="time-filter">
         <option value="">Day + Night</option>
         <option value="day">Day</option>
         <option value="night">Night</option>
       </select>
-      
+
       <label for="hide-empty">
         <input type="checkbox" id="hide-empty"> Hide empty
       </label>
       
       <label for="filter-person">
-        <input type="checkbox" id="filter-person"> Hide person-only
+        <input type="checkbox" id="filter-person"> Hide person
       </label>
 
       <div id="video-count" class="video-count">0 videos</div>

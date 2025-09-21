@@ -5,11 +5,14 @@
 - [x] Improve front-end layout and UI/UX
 - [ ] Add bounding box support for full screen mode
 - [x] Fix FPS synchronization issue (annotations don't line up with video frames)
+- [x] Fix annotation positioning issues at video edges - proper aspect ratio handling and letterboxing support
 - [x] Allow filtering of annotation types by clicking on label (and filter at top) - implemented as object class dropdown
 - [x] Filter checkbox of "empty" clips - implemented as "Hide videos with no detections"
-- [x] Add filter for person-only videos - implemented as "Filter out person-only videos" checkbox
+- [x] Add filter for person-only videos - implemented as "Filter out videos containing people" checkbox
 - [x] Add video count display in header - shows current filtered video count
 - [x] Add day/night filtering - implemented as dropdown filter with "Day + Night", "Day", "Night" options
+- [x] Add sorting by wildlife activity and date - implemented with "Oldest", "Latest", "Most Activity", "Least Activity" options
+- [x] Display wildlife activity metrics and modification dates on video cards
 
 ## Data & Analytics
 - [ ] Create video summary page showing detected objects per video
@@ -18,6 +21,8 @@
 - [x] Add search functionality for finding videos with specific objects - implemented as object class filter dropdown
 - [x] Add day/night video classification - implemented with `is_night` database field and RGB analysis
 - [x] Add color distribution analysis tools - implemented `day_vs_night.py` script with 3D RGB visualization
+- [x] Add wildlife activity proportion tracking - implemented `wildlife_prop` field in database and API
+- [x] Add wildlife proportion visualization - implemented `annotation_prop.py` script with histogram
 
 ## AI/ML Enhancements  
 - [x] Remove movement detection functionality
