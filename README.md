@@ -12,9 +12,9 @@ A wildlife camera web viewer that uses AI to identify and annotate wildlife and 
 ## Features
 
 - **AI Object Detection**: YOLO-based wildlife and people detection with filtering to target objects (person, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe) with confidence scoring and bounding boxes
-- **Smart Filtering**: Filter videos by detected object types, day/night classification, hide videos with no detections, filter out person-only videos, with video count display
+- **Smart Filtering**: Filter videos by detected object types, day/night classification, hide videos with no detections, filter out videos containing people, with sorting by date or wildlife activity and video count display
 - **Thumbnail Previews**: Automatic generation of video thumbnails for improved browsing experience
-- **Web Interface**: Simple, clean web interface with video grid and expandable player focused on AI detection results
+- **Web Interface**: Simple, clean web interface with video grid, expandable player, wildlife activity metrics, and properly aligned annotations that account for video aspect ratios
 - **Fast Streaming**: Efficient video streaming with HTTP range support for large files
 - **Comprehensive Testing**: Full test coverage with automated CI/CD pipeline
 - **Security-First**: Secure subprocess handling and comprehensive linting with ruff and mypy
@@ -29,7 +29,7 @@ A wildlife camera web viewer that uses AI to identify and annotate wildlife and 
 
 ### Setup
 ```bash
-# Install dependencies (includes optional ML dependencies for AI detection)
+# Install dependencies
 just install
 
 # Start development server
@@ -41,7 +41,7 @@ Visit http://localhost:8000 to view the application.
 ### Processing Videos
 ```bash
 # Place your .MP4 files in the data/ directory
-# Run full data ingestion pipeline: file discovery, AI object detection, thumbnail generation, and day/night classification (requires ML dependencies)
+# Run full data ingestion pipeline: file discovery, AI object detection, wildlife proportion calculation, thumbnail generation, and day/night classification (requires dev dependencies)
 cd backend && uv run python -m garden_eye.scripts.ingest_data
 ```
 
@@ -88,7 +88,8 @@ cd backend && just fmt lint test
 │   ├── src/scripts/      # Analysis and utility scripts  
 │   │   ├── day_vs_night.py    # RGB color distribution analysis with 3D visualization
 │   │   ├── analyse_distribution.py # Animated pie chart visualization for annotation and video distributions
-│   │   └── ingest_data.py # Combined data ingestion pipeline: file discovery, YOLO object detection, annotation, thumbnail generation, and day/night classification
+│   │   ├── annotation_prop.py # Wildlife proportion distribution analysis with histogram
+│   │   └── ingest_data.py # Combined data ingestion pipeline: file discovery, YOLO object detection, annotation, wildlife proportion calculation, thumbnail generation, and day/night classification
 │   ├── tests/            # Comprehensive test suite
 │   └── pyproject.toml    # Backend dependencies and config
 ├── frontend/              # Single-page HTML application

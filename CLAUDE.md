@@ -54,24 +54,26 @@ uv run python -m garden_eye.scripts.ingest_data
 - `backend/src/garden_eye/api/range_stream.py`: HTTP range request handling for efficient video streaming
 - `backend/src/garden_eye/log.py`: Centralized logging configuration
 - `backend/src/garden_eye/helpers.py`: Helper functions including `WILDLIFE_COCO_LABELS` for annotation filtering and `is_night_video()` for day/night detection
-- `backend/src/ingest_data.py`: Combined data ingestion pipeline with YOLO-based object detection, annotation storage, FFmpeg-based thumbnail generation, and night/day classification
+- `backend/src/scripts/ingest_data.py`: Combined data ingestion pipeline with YOLO-based object detection, annotation storage, FFmpeg-based thumbnail generation, wildlife proportion calculation, and night/day classification
 - `backend/src/scripts/day_vs_night.py`: RGB color distribution analysis script with 3D visualization for wildlife camera data
 - `backend/src/scripts/analyse_distribution.py`: Animated pie chart visualization for annotation and video distributions
+- `backend/src/scripts/annotation_prop.py`: Wildlife proportion distribution analysis with horizontal histogram visualization
 - `backend/tests/`: Comprehensive test suite with 90%+ coverage
 - Uses SQLite database at `data/database.db`
 - YOLO model weights stored in `weights/` directory
 
 ### Video Processing Pipeline
 1. Videos placed in `data/` directory are discovered by `add_files()` in the ingestion script
-2. `VideoFile` model stores path, size, modification time, annotation status, and night/day classification (`is_night`)
+2. `VideoFile` model stores path, size, modification time, annotation status, wildlife proportion (`wildlife_prop`), and night/day classification (`is_night`)
 3. Ingestion script (`garden_eye.scripts.ingest_data`) runs YOLO object detection and stores only target wildlife/people annotations in database (filters using `WILDLIFE_COCO_LABELS`)
 4. Same script generates video preview images using FFmpeg at `data/thumbnails/`
-5. Script analyzes thumbnail RGB values to classify videos as day/night using `is_night_video()` function
+5. Script calculates wildlife activity proportion (`wildlife_prop`) based on frames containing target wildlife annotations
+6. Script analyzes thumbnail RGB values to classify videos as day/night using `is_night_video()` function
 6. `Annotation` model stores detected objects with bounding boxes, confidence scores, and frame positions
 7. Frontend displays thumbnail previews with day/night filtering and can stream videos via HTTP range requests with AI-detected annotations
 
 ### Key API Endpoints
-- `/api/videos`: List all video files with metadata including thumbnail URLs and `is_night` classification (JSON response)
+- `/api/videos`: List all video files with metadata including thumbnail URLs, wildlife proportion (`wildlife_prop`), and `is_night` classification (JSON response)
 - `/api/annotations/{vid}`: Get AI-detected annotations for a specific video (filtered to target wildlife/people objects)
 - `/api/thumbnail/{vid}`: Serve thumbnail image for video with caching headers
 - `/stream?vid={id}`: Stream video with HTTP Range support for efficient playback
@@ -111,9 +113,9 @@ The backend uses:
 - `frontend/static/images/`: Logo and branding assets
 - Dark theme UI with video grid displaying thumbnail previews
 - Interactive video selection with expandable player interface
-- Header controls: object class filter dropdown, day/night filter dropdown, option to hide videos with no detections, filter to exclude person-only videos, and video count display
-- Displays AI-detected object annotations with confidence scores and bounding boxes
-- Focuses on AI detection results without file size indicators or search functionality
+- Header controls: object class filter dropdown, sorting options (by date/wildlife activity), day/night filter dropdown, option to hide videos with no detections, filter to exclude videos containing people, and video count display
+- Displays AI-detected object annotations with confidence scores and bounding boxes, with proper positioning considering video aspect ratios and letterboxing
+- Focuses on AI detection results with wildlife activity metrics, modification dates, and sorting capabilities
 - Uses `/api/videos`, `/api/annotations/{vid}`, `/api/thumbnail/{vid}`, and `/stream` endpoints
 
 ## Development Practices
