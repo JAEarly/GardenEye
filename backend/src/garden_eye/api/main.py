@@ -40,6 +40,7 @@ class VideoOut(BaseModel):
     name: str
     size: int
     modified: float | None = None
+    wildlife_prop: float = 0.0
     objects: list[str] = []
     thumbnail_url: str
     is_night: bool = False
@@ -91,6 +92,8 @@ def list_videos() -> list[VideoOut]:
                 vid=vf.id,
                 name=vf.path.name,
                 size=int(vf.size),
+                modified=vf.modified,
+                wildlife_prop=vf.wildlife_prop,
                 objects=get_video_objects(vf),
                 thumbnail_url=f"/api/thumbnail/{vf.id}",
                 is_night=vf.is_night,

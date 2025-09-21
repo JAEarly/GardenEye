@@ -1,6 +1,6 @@
 let allFiles = [];
 let filteredFiles = [];
-let currentSort = { column: 'name', direction: 'asc' };
+let currentSort = 'oldest';
 let selectedVideoId = null;
 let annotations = [];
 let showAnnotations = true;
@@ -17,7 +17,7 @@ async function init() {
     
     setupControls();
     updateVideoCount();
-    renderView();
+    sortAndRenderFiles();
   } catch (error) {
     console.error('Failed to load videos:', error);
     document.getElementById('file-list').innerHTML = '<p>Failed to load videos</p>';
@@ -48,6 +48,12 @@ function setupControls() {
   document.getElementById('filter-person').addEventListener('change', (e) => {
     filterPerson = e.target.checked;
     filterFiles();
+  });
+  
+  // Sort by dropdown
+  document.getElementById('sort-by').addEventListener('change', (e) => {
+    currentSort = e.target.value;
+    sortAndRenderFiles();
   });
   
   // Setup video player for annotation overlays
@@ -96,7 +102,7 @@ function filterFiles() {
   }
   
   updateVideoCount();
-  renderView();
+  sortAndRenderFiles();
 }
 
 function updateVideoCount() {
@@ -181,13 +187,6 @@ function createPlaceholderCard(file) {
   
   const header = document.createElement('div');
   header.className = 'card-header';
-  
-  const title = document.createElement('h3');
-  title.className = 'card-title';
-  title.textContent = file.name;
-  title.title = file.name;
-
-  header.appendChild(title);
 
   const meta = document.createElement('div');
   meta.className = 'card-meta';
@@ -232,16 +231,33 @@ function createCollapsedCard(file, card) {
   
   const header = document.createElement('div');
   header.className = 'card-header';
-  
-  const title = document.createElement('h3');
-  title.className = 'card-title';
-  title.textContent = file.name;
-  title.title = file.name; // Tooltip for long names
-
-  header.appendChild(title);
 
   const meta = document.createElement('div');
   meta.className = 'card-meta';
+  
+  // Add metadata info
+  const metaInfo = document.createElement('div');
+  metaInfo.className = 'card-meta-info';
+  
+  // Modified date
+  const modifiedSpan = document.createElement('span');
+  modifiedSpan.className = 'meta-item';
+  if (file.modified) {
+    const date = new Date(file.modified * 1000);
+    modifiedSpan.textContent = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+  } else {
+    modifiedSpan.textContent = 'Unknown date';
+  }
+  metaInfo.appendChild(modifiedSpan);
+  
+  // Wildlife proportion
+  const wildlifeSpan = document.createElement('span');
+  wildlifeSpan.className = 'meta-item';
+  const proportion = file.wildlife_prop || 0;
+  wildlifeSpan.textContent = `${(proportion * 100).toFixed(1)}% wildlife`;
+  metaInfo.appendChild(wildlifeSpan);
+  
+  meta.appendChild(metaInfo);
   
   // Add objects container
   const objectsContainer = document.createElement('div');
@@ -293,13 +309,32 @@ function createExpandedCard(file) {
   const info = document.createElement('div');
   info.className = 'card-info';
   
-  const title = document.createElement('h3');
-  title.className = 'card-title';
-  title.textContent = file.name;
-  title.title = file.name;
-  
   const meta = document.createElement('div');
   meta.className = 'card-meta';
+  
+  // Add metadata info for expanded view
+  const metaInfo = document.createElement('div');
+  metaInfo.className = 'card-meta-info';
+  
+  // Modified date
+  const modifiedSpan = document.createElement('span');
+  modifiedSpan.className = 'meta-item';
+  if (file.modified) {
+    const date = new Date(file.modified * 1000);
+    modifiedSpan.textContent = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+  } else {
+    modifiedSpan.textContent = 'Unknown';
+  }
+  metaInfo.appendChild(modifiedSpan);
+  
+  // Wildlife proportion
+  const wildlifeSpan = document.createElement('span');
+  wildlifeSpan.className = 'meta-item';
+  const proportion = file.wildlife_prop || 0;
+  wildlifeSpan.textContent = `Wildlife Activity: ${(proportion * 100).toFixed(1)}%`;
+  metaInfo.appendChild(wildlifeSpan);
+  
+  meta.appendChild(metaInfo);
   
   // Add objects container for expanded view
   const objectsContainer = document.createElement('div');
@@ -307,7 +342,6 @@ function createExpandedCard(file) {
   displayVideoObjects(file.objects, objectsContainer);
   meta.appendChild(objectsContainer);
   
-  info.appendChild(title);
   info.appendChild(meta);
   
   // Controls
@@ -346,27 +380,19 @@ function createExpandedCard(file) {
   return card;
 }
 
-function sortFiles(column) {
-  if (currentSort.column === column) {
-    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-  } else {
-    currentSort.column = column;
-    currentSort.direction = 'asc';
-  }
-  
+function sortAndRenderFiles() {
   filteredFiles.sort((a, b) => {
-    let valueA = a[column];
-    let valueB = b[column];
-    
-    if (column === 'name') {
-      valueA = valueA.toLowerCase();
-      valueB = valueB.toLowerCase();
-    }
-    
-    if (currentSort.direction === 'asc') {
-      return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
-    } else {
-      return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+    switch (currentSort) {
+      case 'latest':
+        return (b.modified || 0) - (a.modified || 0);
+      case 'oldest':
+        return (a.modified || 0) - (b.modified || 0);
+      case 'most_activity':
+        return (b.wildlife_prop || 0) - (a.wildlife_prop || 0);
+      case 'least_activity':
+        return (a.wildlife_prop || 0) - (b.wildlife_prop || 0);
+      default:
+        return (a.modified || 0) - (b.modified || 0);
     }
   });
   
