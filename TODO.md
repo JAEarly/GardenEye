@@ -9,12 +9,15 @@
 - [x] Filter checkbox of "empty" clips - implemented as "Hide videos with no detections"
 - [x] Add filter for person-only videos - implemented as "Filter out person-only videos" checkbox
 - [x] Add video count display in header - shows current filtered video count
+- [x] Add day/night filtering - implemented as dropdown filter with "Day + Night", "Day", "Night" options
 
 ## Data & Analytics
 - [ ] Create video summary page showing detected objects per video
-- [x] Add annotation filtering to target wildlife/people objects (implemented with COCO_TARGET_LABELS)
+- [ ] Show points of annotation below scrubber bar in expanded view mode
+- [x] Add annotation filtering to target wildlife/people objects (implemented with WILDLIFE_COCO_LABELS)
 - [x] Add search functionality for finding videos with specific objects - implemented as object class filter dropdown
-- [ ] Export annotations to standard formats (COCO, YOLO, etc.)
+- [x] Add day/night video classification - implemented with `is_night` database field and RGB analysis
+- [x] Add color distribution analysis tools - implemented `day_vs_night.py` script with 3D RGB visualization
 
 ## AI/ML Enhancements  
 - [x] Remove movement detection functionality
@@ -22,11 +25,6 @@
 - [ ] Add support for custom trained models
 - [ ] Implement confidence threshold configuration
 - [x] Add batch processing improvements for large video sets - implemented with batch=64 and optimized parameters
-
-## Testing & Quality
-- [ ] Add comprehensive tests for annotation functionality
-- [ ] Add frontend tests for video player and annotation display
-- [ ] Improve test coverage for edge cases (corrupted videos, etc.)
 
 ## Performance & Optimization
 - [x] Simplify dependency structure (merged detection into backend)

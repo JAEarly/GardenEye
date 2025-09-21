@@ -12,7 +12,7 @@ A wildlife camera web viewer that uses AI to identify and annotate wildlife and 
 ## Features
 
 - **AI Object Detection**: YOLO-based wildlife and people detection with filtering to target objects (person, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe) with confidence scoring and bounding boxes
-- **Object Filtering**: Filter videos by detected object types, hide videos with no detections, filter out person-only videos, with video count display
+- **Smart Filtering**: Filter videos by detected object types, day/night classification, hide videos with no detections, filter out person-only videos, with video count display
 - **Thumbnail Previews**: Automatic generation of video thumbnails for improved browsing experience
 - **Web Interface**: Simple, clean web interface with video grid and expandable player focused on AI detection results
 - **Fast Streaming**: Efficient video streaming with HTTP range support for large files
@@ -41,7 +41,7 @@ Visit http://localhost:8000 to view the application.
 ### Processing Videos
 ```bash
 # Place your .MP4 files in the data/ directory
-# Run full data ingestion pipeline: file discovery, AI object detection, and thumbnail generation (requires ML dependencies)
+# Run full data ingestion pipeline: file discovery, AI object detection, thumbnail generation, and day/night classification (requires ML dependencies)
 cd backend && uv run python -m garden_eye.scripts.ingest_data
 ```
 
@@ -84,9 +84,11 @@ cd backend && just fmt lint test
 │   │   │   ├── database.py   # Peewee ORM models
 │   │   │   └── range_stream.py # HTTP range streaming
 │   │   ├── log.py            # Logging configuration
-│   │   ├── helpers.py        # Helper functions and COCO target labels
-│   │   └── scripts/      # Data processing scripts
-│   │       └── ingest_data.py # Combined data ingestion pipeline: file discovery, YOLO object detection, annotation, and FFmpeg-based thumbnail generation
+│   │   ├── helpers.py        # Helper functions, COCO target labels, and day/night detection
+│   ├── src/scripts/      # Analysis and utility scripts  
+│   │   ├── day_vs_night.py    # RGB color distribution analysis with 3D visualization
+│   │   ├── analyse_distribution.py # Animated pie chart visualization for annotation and video distributions
+│   │   └── ingest_data.py # Combined data ingestion pipeline: file discovery, YOLO object detection, annotation, thumbnail generation, and day/night classification
 │   ├── tests/            # Comprehensive test suite
 │   └── pyproject.toml    # Backend dependencies and config
 ├── frontend/              # Single-page HTML application
