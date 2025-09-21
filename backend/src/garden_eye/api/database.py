@@ -34,6 +34,7 @@ class VideoFile(Model):
     size = IntegerField()  # Size in bytes
     modified = FloatField()  # Modification time in seconds
     annotated = BooleanField(default=False)  # Whether annotations have been processed
+    is_night = BooleanField(default=False)  # Whether this video is a night-time (black-and-white) recording
 
 
 class Annotation(Model):
