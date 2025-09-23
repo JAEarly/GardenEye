@@ -13,6 +13,7 @@
 - [x] Add day/night filtering - implemented as dropdown filter with "Day + Night", "Day", "Night" options
 - [x] Add sorting by wildlife activity and date - implemented with "Oldest", "Latest", "Most Activity", "Least Activity" options
 - [x] Display wildlife activity metrics and modification dates on video cards
+- [ ] Screenshot in readme
 
 ## Data & Analytics
 - [ ] Create video summary page showing detected objects per video
@@ -30,6 +31,7 @@
 - [ ] Add support for custom trained models
 - [ ] Implement confidence threshold configuration
 - [x] Add batch processing improvements for large video sets - implemented with batch=64 and optimized parameters
+- [ ] Experiment with depth estimation
 
 ## Performance & Optimization
 - [x] Simplify dependency structure (merged detection into backend)
