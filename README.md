@@ -9,6 +9,8 @@
 
 A wildlife camera web viewer that uses AI to identify and annotate wildlife and people in camera footage, focusing on specific target objects like birds, cats, dogs, and other animals.
 
+[Watch the dev logs!](https://youtube.com/playlist?list=PL2SaEVMy91qKqFED7C5Ah0m3iMt1X5nD4&si=FENz3UhlJ0tX4zfB)
+
 ## Features
 
 - **AI Object Detection**: YOLO-based wildlife and people detection with filtering to target objects (person, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe) with confidence scoring and bounding boxes
