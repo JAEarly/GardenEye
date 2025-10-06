@@ -1,3 +1,5 @@
+"""Wildlife proportion distribution histogram visualization."""
+
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -5,6 +7,7 @@ from garden_eye.api.database import VideoFile, init_database
 
 
 def run() -> None:
+    """Generate horizontal histogram of wildlife proportion distribution across videos."""
     init_database()
 
     # Get all videos with wildlife proportions

@@ -1,3 +1,5 @@
+"""Helper functions for wildlife detection and video analysis."""
+
 from pathlib import Path
 
 import numpy as np
@@ -24,15 +26,21 @@ WILDLIFE_COCO_LABELS = {
 
 
 def is_target_coco_annotation(label: str) -> bool:
+    """
+    Check if a label is in the target wildlife/people categories.
+
+    Args:
+        label: COCO annotation label name
+    """
     return label in WILDLIFE_COCO_LABELS.values()
 
 
 def is_night_video(thumbnail_path: Path, tolerance: float = 2.0) -> bool:
     """
-    Detects if a video is from night mode (typically grayscale with IR illumination).
+    Detect if a video is from night mode (typically grayscale with IR illumination).
 
     Args:
-        thumbnail_path: Path to video thumbnail.
+        thumbnail_path: Path to video thumbnail
         tolerance: Maximum allowed difference between RGB channels to consider grayscale
 
     Returns:

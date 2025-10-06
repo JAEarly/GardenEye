@@ -1,3 +1,5 @@
+"""HTTP range request support for efficient video streaming."""
+
 from __future__ import annotations
 
 import os
@@ -11,8 +13,14 @@ CHUNK_SIZE = 1024 * 1024  # 1MB
 
 
 def _parse_range(range_header: str, file_size: int) -> tuple[int, int]:
-    """Parse a Range header into (start, end) byte positions inclusive.
+    """
+    Parse a Range header into (start, end) byte positions inclusive.
+
     Supports formats like 'bytes=START-' or 'bytes=START-END' or 'bytes=-SUFFIX'.
+
+    Args:
+        range_header: HTTP Range header value
+        file_size: Total file size in bytes
     """
     try:
         units, ranges = range_header.split("=", 1)
@@ -46,7 +54,13 @@ def _parse_range(range_header: str, file_size: int) -> tuple[int, int]:
 
 
 def range_file_response(file_path: Path, request: Request) -> Response:
-    """Return a Response supporting HTTP Range requests for video playback."""
+    """
+    Create a streaming response supporting HTTP Range requests for video playback.
+
+    Args:
+        file_path: Path to video file
+        request: FastAPI Request object
+    """
     if not file_path.is_file():
         raise HTTPException(status_code=404, detail="File not found")
 

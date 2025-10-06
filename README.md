@@ -43,8 +43,9 @@ Visit http://localhost:8000 to view the application.
 ### Processing Videos
 ```bash
 # Place your .MP4 files in the data/ directory
-# Run full data ingestion pipeline: file discovery, AI object detection, wildlife proportion calculation, thumbnail generation, and day/night classification (requires dev dependencies)
-cd backend && uv run python -m scripts.ingest_data
+# Run full data ingestion pipeline: file discovery, AI object detection,
+# wildlife proportion calculation, thumbnail generation, and day/night classification
+cd backend && uv run python -m garden_eye.scripts.ingest_data
 ```
 
 ## Development
@@ -53,60 +54,76 @@ This project uses a single Python package managed by **uv** and coordinated with
 
 ### Running Commands
 ```bash
-# Format code in backend
-# Run linting in backend (ruff + mypy)
-# Run tests in backend (pytest with coverage)
-# Clean build artifacts
+# Format, lint, test, and clean (runs across backend workspace)
 just fmt lint test clean
 
 # View all available commands
 just help
 ```
 
-### Backend Commands
+### Backend-Specific Commands
 ```bash
-# Backend commands
-cd backend && just fmt lint test
+cd backend
+
+# Format code (ruff format + ruff check --fix)
+just fmt
+
+# Run linting (ruff check + mypy)
+just lint
+
+# Run tests with coverage
+just test
+
+# Clean build artifacts
+just clean
 ```
 
 ### Technology Stack
-- **Backend**: 
-  - Core: FastAPI, Peewee ORM, SQLite, uvicorn, tqdm
-  - Optional ML: OpenCV, YOLO (Ultralytics), FFmpeg (for AI detection and thumbnails)
-- **Development**: uv, just, ruff, mypy, pytest
+- **Backend (garden-eye)**:
+  - Core: FastAPI, Peewee ORM, SQLite, uvicorn, httpx, tqdm
+  - Dev/ML: OpenCV, YOLO (Ultralytics), matplotlib, Pillow, PyTorch
+  - Testing: pytest, pytest-cov, pytest-asyncio
+  - Type checking: mypy with strict mode
+  - Linting: ruff (with bandit security rules)
+- **Build & Automation**: uv (package manager), just (task runner)
 - **CI/CD**: GitHub Actions, Renovate
-- **Frontend**: Vanilla HTML/CSS/JavaScript
+- **Frontend**: Vanilla HTML/CSS/JavaScript with canvas-based annotation overlay
 
 ### Project Structure
 ```
-├── backend/               # FastAPI application (garden-eye)
-│   ├── src/garden_eye/   # Application source code
-│   │   ├── api/          # FastAPI application
-│   │   │   ├── main.py       # FastAPI app and endpoints
-│   │   │   ├── database.py   # Peewee ORM models
-│   │   │   └── range_stream.py # HTTP range streaming
-│   │   ├── log.py            # Logging configuration
-│   │   ├── helpers.py        # Helper functions, COCO target labels, and day/night detection
-│   ├── src/scripts/      # Analysis and utility scripts  
-│   │   ├── day_vs_night.py    # RGB color distribution analysis with 3D visualization
-│   │   ├── analyse_distribution.py # Animated pie chart visualization for annotation and video distributions
-│   │   ├── annotation_prop.py # Wildlife proportion distribution analysis with histogram
-│   │   └── ingest_data.py # Combined data ingestion pipeline: file discovery, YOLO object detection, annotation, wildlife proportion calculation, thumbnail generation, and day/night classification
-│   ├── tests/            # Comprehensive test suite
-│   └── pyproject.toml    # Backend dependencies and config
+├── backend/               # FastAPI backend (garden-eye package)
+│   ├── src/
+│   │   ├── garden_eye/   # Core application package
+│   │   │   ├── __init__.py   # Path configuration
+│   │   │   ├── api/          # FastAPI application
+│   │   │   │   ├── main.py       # API endpoints and app setup
+│   │   │   │   ├── database.py   # Peewee ORM models (VideoFile, Annotation)
+│   │   │   │   └── range_stream.py # HTTP range request handling
+│   │   │   ├── log.py        # Logging configuration
+│   │   │   └── helpers.py    # Wildlife labels and day/night detection
+│   │   └── scripts/      # Analysis and processing scripts
+│   │       ├── ingest_data.py # Data ingestion pipeline (detection, thumbnails, classification)
+│   │       ├── day_vs_night.py # 3D RGB distribution visualization
+│   │       ├── analyse_distribution.py # Animated pie chart for distributions
+│   │       └── annotation_prop.py # Wildlife proportion histogram
+│   ├── tests/            # Test suite (90%+ coverage)
+│   ├── pyproject.toml    # Package config and dependencies
+│   └── justfile          # Backend task automation
 ├── frontend/              # Single-page HTML application
 │   └── static/           # Web assets
 │       ├── index.html    # Main HTML page
 │       ├── style.css     # Stylesheet
 │       ├── app.js        # JavaScript application
 │       └── images/       # Logo and branding assets
-├── data/                  # Video files and thumbnails directory (gitignored)
+├── data/                  # Video files and SQLite database (gitignored)
+│   ├── database.db       # SQLite database
 │   ├── thumbnails/       # Generated thumbnail images
-│   └── 25_10_08/         # Video files organized by date
-├── weights/               # YOLO model weights directory (gitignored)
+│   └── **/*.MP4          # Video files (organized by date/folder structure)
+├── weights/               # YOLO model weights (gitignored)
 ├── .github/
-│   ├── workflows/        # GitHub Actions CI/CD
-│   └── renovate.json     # Automated dependency updates
-├── justfile              # Unified task runner for backend
-└── CLAUDE.md             # Development guide for AI assistants
+│   ├── workflows/        # CI/CD (lint and test jobs)
+│   └── renovate.json     # Dependency automation
+├── justfile              # Root task runner (delegates to backend)
+├── CLAUDE.md             # AI assistant development guide
+└── LICENSE               # Project license
 ```

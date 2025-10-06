@@ -1,3 +1,5 @@
+"""Data ingestion pipeline for video processing and annotation."""
+
 import logging
 import os
 import shutil
@@ -22,6 +24,7 @@ logger = get_logger(__name__)
 
 
 def run() -> None:
+    """Execute the full data ingestion pipeline."""
     # Setup database
     init_database()
     # Load files into database
@@ -33,6 +36,7 @@ def run() -> None:
 
 
 def add_files() -> None:
+    """Discover and add new video files from data directory to database."""
     logger.info("Adding files...")
     data = []
     for path in DATA_DIR.glob("**/*.MP4"):
@@ -43,6 +47,12 @@ def add_files() -> None:
 
 
 def annotate(video_file: VideoFile) -> None:
+    """
+    Run YOLO object detection on video and store annotations.
+
+    Args:
+        video_file: VideoFile instance to process
+    """
     # Skip if already annotated exists
     if video_file.annotated:
         return
@@ -100,6 +110,13 @@ def annotate(video_file: VideoFile) -> None:
 
 
 def create_thumbnail(video_file: VideoFile, seconds: int = 1) -> None:
+    """
+    Generate thumbnail image and classify day/night mode for video.
+
+    Args:
+        video_file: VideoFile instance to process
+        seconds: Timestamp in seconds to extract thumbnail frame
+    """
     thumbnail_path = get_thumbnail_path(video_file)
     # Generate thumbnail if it doesn't already exist
     if not thumbnail_path.exists():

@@ -1,143 +1,113 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Codebase instructions for Claude Code (claude.ai/code). These instructions override default behavior.
 
-**Note**: Your name is Claude. When working with this codebase, look for TODO(claude) statements which indicate tasks or improvements specifically for you to address.
+**Note**: Look for TODO(claude) statements indicating tasks for you to address.
 
 ## Project Overview
 
-GardenEye is a wildlife camera web viewer with two main components:
+GardenEye: Wildlife camera web viewer with AI object detection.
 
-- **Backend** (`backend/`): FastAPI application serving video files and metadata, including AI object detection
-- **Frontend** (`frontend/`): Single-page HTML application for video viewing
+- **Backend** (`backend/`): FastAPI serving videos/metadata with YOLO-based detection
+- **Frontend** (`frontend/`): Single-page HTML app for video viewing with annotation overlay
 
-The backend serves videos from the `data/` directory and stores metadata in a SQLite database. The backend includes AI detection scripts that use YOLO-based object detection to identify and annotate wildlife in videos, filtering to only target wildlife and people objects (person, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe). The frontend displays videos with a simple interface for viewing original videos and their AI-detected annotations.
+Backend package: `garden-eye` with source in `src/garden_eye/`
 
-The backend package is named `garden-eye` with source code organized under `src/garden_eye/`.
+Target wildlife objects: person, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe
+
+## Quick Start
+
+```bash
+just install    # Install dependencies
+just run        # Start dev server (http://localhost:8000)
+
+# Process videos (requires dev dependencies)
+cd backend && uv run python -m garden_eye.scripts.ingest_data
+```
 
 ## Development Commands
 
-### Root Level Commands
+**Root level:**
 ```bash
-# Install all dependencies (including optional ml dependencies)
-just install
-
-# Start development server
-just run
-
-# Run across backend workspace
-just fmt     # Format code in backend
-just lint    # Lint code in backend  
-just test    # Run tests in backend
-just clean   # Clean artifacts in backend
+just fmt     # Format backend code
+just lint    # Lint backend (ruff + mypy)
+just test    # Test backend with coverage
+just clean   # Clean artifacts
 ```
 
-### Backend Commands
+**Backend only:**
 ```bash
-# From `backend/` directory
+cd backend
 just fmt     # ruff format + ruff check --fix
 just lint    # ruff check + mypy
 just test    # pytest with coverage
-
-# Install with optional ML dependencies for detection/annotation
-uv sync --locked --all-extras --dev
-
-# Run full data ingestion pipeline: file discovery, object detection, and thumbnail generation (requires ml extras)
-uv run python -m garden_eye.scripts.ingest_data
 ```
 
 ## Architecture
 
-### Backend Structure (`garden-eye`)
-- `backend/src/garden_eye/api/main.py`: FastAPI application with video streaming endpoints
-- `backend/src/garden_eye/api/database.py`: Peewee ORM models with `VideoFile` and `Annotation` models
-- `backend/src/garden_eye/api/range_stream.py`: HTTP range request handling for efficient video streaming
-- `backend/src/garden_eye/log.py`: Centralized logging configuration
-- `backend/src/garden_eye/helpers.py`: Helper functions including `WILDLIFE_COCO_LABELS` for annotation filtering and `is_night_video()` for day/night detection
-- `backend/src/scripts/ingest_data.py`: Combined data ingestion pipeline with YOLO-based object detection, annotation storage, FFmpeg-based thumbnail generation, wildlife proportion calculation, and night/day classification
-- `backend/src/scripts/day_vs_night.py`: RGB color distribution analysis script with 3D visualization for wildlife camera data
-- `backend/src/scripts/analyse_distribution.py`: Animated pie chart visualization for annotation and video distributions
-- `backend/src/scripts/annotation_prop.py`: Wildlife proportion distribution analysis with horizontal histogram visualization
-- `backend/tests/`: Comprehensive test suite with 90%+ coverage
-- Uses SQLite database at `data/database.db`
-- YOLO model weights stored in `weights/` directory
+### Backend (`garden-eye`)
+- `src/garden_eye/api/main.py`: FastAPI endpoints
+- `src/garden_eye/api/database.py`: Peewee ORM (`VideoFile`, `Annotation` models)
+- `src/garden_eye/api/range_stream.py`: HTTP range requests for video streaming
+- `src/garden_eye/helpers.py`: `WILDLIFE_COCO_LABELS`, `is_night_video()`, `is_target_coco_annotation()`
+- `src/garden_eye/log.py`: Logging config
+- `src/scripts/ingest_data.py`: YOLO detection + thumbnails + wildlife proportion + day/night classification
+- `src/scripts/day_vs_night.py`: 3D RGB visualization
+- `src/scripts/analyse_distribution.py`: Animated pie charts
+- `src/scripts/annotation_prop.py`: Wildlife proportion histogram
+- `tests/`: 90%+ coverage test suite
+
+**Database:** SQLite at `data/database.db`
+**YOLO weights:** `weights/` directory
 
 ### Video Processing Pipeline
-1. Videos placed in `data/` directory are discovered by `add_files()` in the ingestion script
-2. `VideoFile` model stores path, size, modification time, annotation status, wildlife proportion (`wildlife_prop`), and night/day classification (`is_night`)
-3. Ingestion script (`garden_eye.scripts.ingest_data`) runs YOLO object detection and stores only target wildlife/people annotations in database (filters using `WILDLIFE_COCO_LABELS`)
-4. Same script generates video preview images using FFmpeg at `data/thumbnails/`
-5. Script calculates wildlife activity proportion (`wildlife_prop`) based on frames containing target wildlife annotations
-6. Script analyzes thumbnail RGB values to classify videos as day/night using `is_night_video()` function
-6. `Annotation` model stores detected objects with bounding boxes, confidence scores, and frame positions
-7. Frontend displays thumbnail previews with day/night filtering and can stream videos via HTTP range requests with AI-detected annotations
+1. Videos in `data/` discovered by ingestion script
+2. `VideoFile` stores path, size, mtime, annotation status, `wildlife_prop`, `is_night`
+3. YOLO detection stores target wildlife/people annotations in `Annotation` model
+4. FFmpeg generates thumbnails at `data/thumbnails/`
+5. Script calculates `wildlife_prop` (frames with wildlife / total frames)
+6. RGB analysis classifies day/night videos via `is_night_video()`
 
 ### Key API Endpoints
-- `/api/videos`: List all video files with metadata including thumbnail URLs, wildlife proportion (`wildlife_prop`), and `is_night` classification (JSON response)
-- `/api/annotations/{vid}`: Get AI-detected annotations for a specific video (filtered to target wildlife/people objects)
-- `/api/thumbnail/{vid}`: Serve thumbnail image for video with caching headers
-- `/stream?vid={id}`: Stream video with HTTP Range support for efficient playback
-- `/`: Serves the frontend single-page application
+- `/api/videos`: List videos with metadata (JSON)
+- `/api/annotations/{vid}`: Get annotations for video
+- `/api/thumbnail/{vid}`: Serve thumbnail with caching
+- `/stream?vid={id}`: Stream video with Range support
+- `/`: Serve frontend
+
+### Frontend
+- `frontend/static/index.html`: Single-page app
+- `frontend/static/app.js`: Application logic
+- `frontend/static/style.css`: Dark theme styles
+- Features: grid view, thumbnail previews, expandable player, annotation overlay, filters (object class, day/night, hide empty, exclude people), sorting (date/wildlife activity)
 
 ## Dependencies
 
-The backend uses:
-- **uv** for Python package management
-- **ruff** for linting and formatting
-- **mypy** for type checking
-- **just** for task running
+**Package manager:** uv
+**Task runner:** just
 
-**Backend** (`garden-eye`): 
-- Core dependencies: FastAPI, Peewee ORM, uvicorn, httpx (for testing), tqdm
-- Optional ML dependencies (for AI detection): OpenCV, YOLO (Ultralytics), FFmpeg (for thumbnails)
-- Dev dependencies: mypy, ruff, pytest, pytest-cov, pytest-asyncio
+**Backend core:** FastAPI, Peewee, uvicorn, httpx, tqdm
+**Dev/ML:** OpenCV, YOLO (Ultralytics), matplotlib, Pillow, PyTorch
+**Testing:** pytest, pytest-cov, pytest-asyncio
+**Quality:** mypy (strict), ruff (including bandit security rules)
 
-## Testing & Quality
+## Code Quality
 
-### Test Coverage
-- Backend: 90%+ test coverage with comprehensive test suite including detection scripts
-- Tests use `test__<thing>__<outcome>` naming convention
-- All test functions have `-> None` return type annotations
+- Test naming: `test__<thing>__<outcome>`
+- All test functions: `-> None` return type
+- Coverage threshold: 90%+
+- Docstrings: Google-style, imperative mood, no default values
+- Security: No `shell=True`, use `shutil.which()` for executables
+- Type annotations: Required (mypy strict mode)
+- Line length: 120 characters
 
-### Code Quality
-- **ruff**: Comprehensive linting with security rules (bandit)
-- **mypy**: Strict type checking with `disallow_untyped_defs`
-- **pytest**: Full test automation with coverage reports
-- **GitHub Actions**: Automated CI/CD with lint and test jobs
-- **Renovate**: Automated dependency updates
+## Sync Task Instructions
 
-### Frontend Structure
-- `frontend/static/index.html`: Single-page HTML application 
-- `frontend/static/style.css`: Separate CSS stylesheet
-- `frontend/static/app.js`: Separate JavaScript application logic
-- `frontend/static/images/`: Logo and branding assets
-- Dark theme UI with video grid displaying thumbnail previews
-- Interactive video selection with expandable player interface
-- Header controls: object class filter dropdown, sorting options (by date/wildlife activity), day/night filter dropdown, option to hide videos with no detections, filter to exclude videos containing people, and video count display
-- Displays AI-detected object annotations with confidence scores and bounding boxes, with proper positioning considering video aspect ratios and letterboxing
-- Focuses on AI detection results with wildlife activity metrics, modification dates, and sorting capabilities
-- Uses `/api/videos`, `/api/annotations/{vid}`, `/api/thumbnail/{vid}`, and `/stream` endpoints
+When asked to perform sync task:
 
-## Development Practices
-
-### Testing Convention
-- Python tests should be named `test__<thing>__<outcome>`
-- All test functions must have `-> None` return type annotation
-- Use proper type annotations for fixture parameters (e.g., `SqliteDatabase`, `Path`)
-- Tests should achieve high coverage (85%+ threshold)
-
-### Security
-- No `shell=True` in subprocess calls - use list format with full executable paths
-- Use `shutil.which()` to find system executables like ffmpeg
-- Comprehensive security linting with bandit (S-rules in ruff)
-
-### Code Organization
-- Source code in `src/` directories within each package
-- Comprehensive type annotations required (mypy strict mode)
-- 120-character line length limit
-- Import sorting and modern Python syntax (pyupgrade)
-
-### Project Management
-- Use `just` commands from root for backend operations
-- Backend commands available in the `backend/` directory
-- Unified dependency management with uv and locked versions
+1. **Analyze project:** List modules, scripts, components, dependencies, features
+2. **Update docstrings:** Follow Google-style conventions (imperative mood, no default values, omit None returns)
+3. **Update README.md:** Ensure accuracy of purpose, installation, usage, structure
+4. **Update CLAUDE.md:** Keep lean, accurate, intentional; trim redundancy
+5. **Consistency checks:** Ensure all documentation matches current codebase
+6. **Output:** Use project files as source of truth, not old docs
