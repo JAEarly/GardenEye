@@ -14,7 +14,7 @@ from garden_eye.helpers import is_night_video, is_target_coco_annotation
 from garden_eye.log import get_logger
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-MODEL_NAME = "yolo11n.pt"
+MODEL_NAME = "yolo11m.pt"
 MODEL = YOLO(WEIGHTS_DIR / MODEL_NAME)
 
 
@@ -101,30 +101,29 @@ def annotate(video_file: VideoFile) -> None:
 
 def create_thumbnail(video_file: VideoFile, seconds: int = 1) -> None:
     thumbnail_path = get_thumbnail_path(video_file)
-    # Skip if thumbnail already exists
-    if thumbnail_path.exists():
-        return
-    # Find ffmpeg executable
-    ffmpeg_path = shutil.which("ffmpeg")
-    if not ffmpeg_path:
-        logger.error("ffmpeg not found in PATH")
-        return
-    # Create thumbnail with ffmpeg
-    command = [
-        ffmpeg_path,
-        "-ss",
-        str(seconds),  # Seek to timestamp (seconds)
-        "-i",
-        str(video_file.path),
-        "-vframes",
-        "1",  # Extract 1 frame
-        "-q:v",
-        "2",  # High quality
-        "-s",
-        "280x157",  # Resize to card dimensions
-        os.fspath(thumbnail_path),
-    ]
-    subprocess.run(command, capture_output=True, text=True, check=True)
+    # Generate thumbnail if it doesn't already exist
+    if not thumbnail_path.exists():
+        # Find ffmpeg executable
+        ffmpeg_path = shutil.which("ffmpeg")
+        if not ffmpeg_path:
+            logger.error("ffmpeg not found in PATH")
+            return
+        # Create thumbnail with ffmpeg
+        command = [
+            ffmpeg_path,
+            "-ss",
+            str(seconds),  # Seek to timestamp (seconds)
+            "-i",
+            str(video_file.path),
+            "-vframes",
+            "1",  # Extract 1 frame
+            "-q:v",
+            "2",  # High quality
+            "-s",
+            "280x157",  # Resize to card dimensions
+            os.fspath(thumbnail_path),
+        ]
+        subprocess.run(command, capture_output=True, text=True, check=True)
     # Update whether this is a night video or not (requires thumbnail)
     video_file.is_night = is_night_video(thumbnail_path)  # type: ignore[assignment]
     video_file.save()

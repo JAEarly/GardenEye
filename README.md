@@ -44,7 +44,7 @@ Visit http://localhost:8000 to view the application.
 ```bash
 # Place your .MP4 files in the data/ directory
 # Run full data ingestion pipeline: file discovery, AI object detection, wildlife proportion calculation, thumbnail generation, and day/night classification (requires dev dependencies)
-cd backend && uv run python -m garden_eye.scripts.ingest_data
+cd backend && uv run python -m scripts.ingest_data
 ```
 
 ## Development
