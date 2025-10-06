@@ -14,7 +14,7 @@ A wildlife camera web viewer that uses AI to identify and annotate wildlife and 
 ## Features
 
 - **AI Object Detection**: YOLO-based wildlife and people detection with filtering to target objects (person, bird, cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe) with confidence scoring and bounding boxes
-- **Smart Filtering**: Filter videos by detected object types, day/night classification, hide videos with no detections, filter out videos containing people, with sorting by date or wildlife activity and video count display
+- **Smart Filtering**: Date range slider, day/night classification filter, hide empty videos, exclude people filter, sorting by date or wildlife activity, and video count display
 - **Thumbnail Previews**: Automatic generation of video thumbnails for improved browsing experience
 - **Web Interface**: Simple, clean web interface with video grid, expandable player, wildlife activity metrics, and properly aligned annotations that account for video aspect ratios
 - **Fast Streaming**: Efficient video streaming with HTTP range support for large files
