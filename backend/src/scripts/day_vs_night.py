@@ -1,3 +1,5 @@
+"""3D RGB distribution visualization for day/night video analysis."""
+
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.backend_bases import Event, MouseEvent
@@ -7,6 +9,7 @@ from garden_eye.api.database import VideoFile, get_thumbnail_path, init_database
 
 
 def run() -> None:
+    """Generate interactive 3D plot of RGB color distributions from video thumbnails."""
     init_database()
     mean_rgbs_list = []
     for vf in VideoFile.select():

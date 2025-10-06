@@ -1,3 +1,5 @@
+"""Animated pie chart visualization for annotation and video distributions."""
+
 from collections.abc import Iterable
 
 from matplotlib import pyplot as plt
@@ -9,6 +11,7 @@ from garden_eye.helpers import WILDLIFE_COCO_LABELS, is_target_coco_annotation
 
 
 def run() -> None:
+    """Create animated transition between annotation and video distributions."""
     init_database()
     video_dist = get_video_distribution()
     annotation_dist = get_annotation_distribution()
@@ -92,6 +95,8 @@ def run() -> None:
 
 def get_video_distribution() -> dict[str, int]:
     """
+    Count videos by detected content categories.
+
     Counts the number of videos that contain:
     1. Any wildlife annotation in WILDLIFE_COCO_LABELS ("Wildlife") - the number of "Person" annotations.
     2. Only a "person" annotation ("Person").
@@ -133,6 +138,8 @@ def get_video_distribution() -> dict[str, int]:
 
 def get_annotation_distribution() -> dict[str, int]:
     """
+    Count annotations by category.
+
     Counts the number of annotations by category:
     1. Wildlife annotations (non-person animals from WILDLIFE_COCO_LABELS) ("Wildlife").
     2. Person annotations ("Person").

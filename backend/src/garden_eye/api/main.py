@@ -1,3 +1,5 @@
+"""FastAPI application for GardenEye wildlife camera viewer."""
+
 from __future__ import annotations
 
 from collections.abc import AsyncGenerator
@@ -30,12 +32,15 @@ for name in ["uvicorn", "uvicorn.error", "uvicorn.access"]:
 
 @asynccontextmanager
 async def lifespan(app_: FastAPI) -> AsyncGenerator[None, Any]:
+    """Manage application lifespan, initializing and closing database."""
     db = init_database()
     yield
     db.close()
 
 
 class VideoOut(BaseModel):
+    """Video file metadata response model."""
+
     vid: int
     name: str
     size: int
@@ -47,6 +52,8 @@ class VideoOut(BaseModel):
 
 
 class AnnotationOut(BaseModel):
+    """Object detection annotation response model."""
+
     frame_idx: int
     name: str
     class_id: int
@@ -75,6 +82,7 @@ app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
 
 @app.get("/")
 def index() -> FileResponse:
+    """Serve the frontend HTML application."""
     index_path = STATIC_ROOT / "index.html"
     if not index_path.is_file():
         raise HTTPException(500, detail="Missing static/index.html")
@@ -83,7 +91,7 @@ def index() -> FileResponse:
 
 @app.get("/api/videos")
 def list_videos() -> list[VideoOut]:
-    """Return a flat list of video files from the database."""
+    """List all video files with metadata from the database."""
     items: list[VideoOut] = []
     # Query the DB and order by path for stable output
     for vf in VideoFile.select().order_by(VideoFile.path.asc()):
@@ -104,7 +112,7 @@ def list_videos() -> list[VideoOut]:
 
 @app.get("/api/annotations/{vid}")
 def get_annotations(vid: int) -> list[AnnotationOut]:
-    """Returns annotations for a specific video."""
+    """Retrieve object detection annotations for a specific video."""
     video_file = VideoFile.get_by_id(vid)
     annotations = []
     for annotation in Annotation.select().where(Annotation.video_file == video_file):

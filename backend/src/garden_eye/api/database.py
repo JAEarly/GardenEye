@@ -1,3 +1,5 @@
+"""Database models and operations for GardenEye."""
+
 import os
 from pathlib import Path
 
@@ -21,14 +23,20 @@ logger = get_logger(__name__)
 
 
 class PathField(CharField):
+    """Custom Peewee field for storing pathlib.Path objects as strings."""
+
     def db_value(self, path: Path) -> str:
+        """Convert Path to string for database storage."""
         return os.fspath(path)
 
     def python_value(self, str_path: str) -> Path:
+        """Convert database string back to Path object."""
         return Path(str_path)
 
 
 class VideoFile(Model):
+    """Database model for video file metadata."""
+
     id = AutoField()
     path = PathField(unique=True)  # Path
     size = IntegerField()  # Size in bytes
@@ -39,6 +47,8 @@ class VideoFile(Model):
 
 
 class Annotation(Model):
+    """Database model for object detection annotations."""
+
     video_file = ForeignKeyField(VideoFile, backref="annotations")
     frame_idx = IntegerField()
     name = CharField()  # Object class name (e.g., "dog")
@@ -51,6 +61,12 @@ class Annotation(Model):
 
 
 def init_database(db_path: Path = DATABASE_PATH) -> SqliteDatabase:
+    """
+    Initialize and configure the SQLite database.
+
+    Args:
+        db_path: Path to SQLite database file
+    """
     logger.info(f"Initialising database with {db_path=}")
     db = SqliteDatabase(db_path)
     db.connect()
@@ -65,7 +81,13 @@ def init_database(db_path: Path = DATABASE_PATH) -> SqliteDatabase:
 
 
 def get_video_objects(video_file: VideoFile, filter_person: bool = False) -> list[str]:
-    """Gets the list of unique objects in a particular video, ordered by frequency, e.g. `("dog", "cat", "person")`."""
+    """
+    Get unique detected objects in a video, ordered by frequency.
+
+    Args:
+        video_file: VideoFile instance to query
+        filter_person: Whether to exclude videos containing only "person" annotations
+    """
     # Use SQL aggregation to count annotations by object name and sort by frequency
     objs = (
         Annotation.select(Annotation.name, fn.COUNT().alias("count"))
@@ -80,4 +102,10 @@ def get_video_objects(video_file: VideoFile, filter_person: bool = False) -> lis
 
 
 def get_thumbnail_path(video_file: VideoFile) -> Path:
+    """
+    Get the thumbnail file path for a video.
+
+    Args:
+        video_file: VideoFile instance
+    """
     return THUMBNAIL_DIR / f"{video_file.id}.jpg"

@@ -1,7 +1,16 @@
+"""Centralized logging configuration for GardenEye."""
+
 import logging
 
 
 def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
+    """
+    Create and configure a logger with standardized formatting.
+
+    Args:
+        name: Logger name, typically module name
+        level: Logging level
+    """
     logger = logging.getLogger(name)
     logger.setLevel(level)
     console = logging.StreamHandler()
