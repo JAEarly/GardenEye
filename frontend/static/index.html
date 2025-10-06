@@ -21,21 +21,6 @@
   </header>
   <main>
     <div class="controls">
-      <select id="object-filter">
-        <option value="">All Objects</option>
-        <option value="person">Person</option>
-        <option value="bird">Bird</option>
-        <option value="cat">Cat</option>
-        <option value="dog">Dog</option>
-        <option value="horse">Horse</option>
-        <option value="sheep">Sheep</option>
-        <option value="cow">Cow</option>
-        <option value="elephant">Elephant</option>
-        <option value="bear">Bear</option>
-        <option value="zebra">Zebra</option>
-        <option value="giraffe">Giraffe</option>
-      </select>
-
       <select id="sort-by">
         <option value="oldest">Oldest</option>
         <option value="latest">Latest</option>
@@ -56,6 +41,19 @@
       <label for="filter-person">
         <input type="checkbox" id="filter-person"> Hide person
       </label>
+
+      <div class="date-range-container">
+        <div class="date-range-slider">
+          <input type="range" id="date-range-min" min="0" max="100" value="0" class="range-input range-min">
+          <input type="range" id="date-range-max" min="0" max="100" value="100" class="range-input range-max">
+          <div class="slider-track"></div>
+          <div class="slider-range"></div>
+        </div>
+        <div class="date-range-labels">
+          <span id="date-range-min-label">-</span>
+          <span id="date-range-max-label">-</span>
+        </div>
+      </div>
 
       <div id="video-count" class="video-count">0 videos</div>
 

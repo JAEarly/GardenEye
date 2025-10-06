@@ -8,14 +8,28 @@ let hideEmpty = false;
 let objectFilter = '';
 let filterPerson = false;
 let timeFilter = '';
+let dateRangeMin = 0;
+let dateRangeMax = 100;
+let minDate = null;
+let maxDate = null;
 
 async function init() {
   try {
     const res = await fetch('/api/videos');
     allFiles = await res.json();
     filteredFiles = [...allFiles];
-    
+
+    // Calculate date range from files
+    if (allFiles.length > 0) {
+      const dates = allFiles.map(f => f.modified).filter(d => d != null).sort((a, b) => a - b);
+      if (dates.length > 0) {
+        minDate = dates[0];
+        maxDate = dates[dates.length - 1];
+      }
+    }
+
     setupControls();
+    updateDateRangeLabels();
     updateVideoCount();
     sortAndRenderFiles();
   } catch (error) {
@@ -31,31 +45,87 @@ function setupControls() {
     hideEmpty = e.target.checked;
     filterFiles();
   });
-  
-  // Object filter dropdown
-  document.getElementById('object-filter').addEventListener('change', (e) => {
-    objectFilter = e.target.value;
-    filterFiles();
-  });
-  
+
   // Time filter dropdown
   document.getElementById('time-filter').addEventListener('change', (e) => {
     timeFilter = e.target.value;
     filterFiles();
   });
-  
+
   // Filter person checkbox
   document.getElementById('filter-person').addEventListener('change', (e) => {
     filterPerson = e.target.checked;
     filterFiles();
   });
-  
+
   // Sort by dropdown
   document.getElementById('sort-by').addEventListener('change', (e) => {
     currentSort = e.target.value;
     sortAndRenderFiles();
   });
-  
+
+  // Date range sliders
+  const minSlider = document.getElementById('date-range-min');
+  const maxSlider = document.getElementById('date-range-max');
+  const sliderTrack = document.querySelector('.slider-track');
+
+  minSlider.addEventListener('input', (e) => {
+    const value = parseInt(e.target.value);
+    if (value < dateRangeMax) {
+      dateRangeMin = value;
+      minSlider.value = value;
+      updateDateRangeUI();
+      updateDateRangeLabels();
+      filterFiles();
+    } else {
+      minSlider.value = dateRangeMin;
+    }
+  });
+
+  maxSlider.addEventListener('input', (e) => {
+    const value = parseInt(e.target.value);
+    if (value > dateRangeMin) {
+      dateRangeMax = value;
+      maxSlider.value = value;
+      updateDateRangeUI();
+      updateDateRangeLabels();
+      filterFiles();
+    } else {
+      maxSlider.value = dateRangeMax;
+    }
+  });
+
+  // Click on track to move nearest slider
+  sliderTrack.addEventListener('click', (e) => {
+    const rect = sliderTrack.getBoundingClientRect();
+    const clickPosition = (e.clientX - rect.left) / rect.width;
+    const clickValue = Math.round(clickPosition * 100);
+
+    // Determine which handle is closer
+    const distToMin = Math.abs(clickValue - dateRangeMin);
+    const distToMax = Math.abs(clickValue - dateRangeMax);
+
+    if (distToMin < distToMax) {
+      // Move min slider
+      if (clickValue < dateRangeMax) {
+        dateRangeMin = clickValue;
+        minSlider.value = clickValue;
+        updateDateRangeUI();
+        updateDateRangeLabels();
+        filterFiles();
+      }
+    } else {
+      // Move max slider
+      if (clickValue > dateRangeMin) {
+        dateRangeMax = clickValue;
+        maxSlider.value = clickValue;
+        updateDateRangeUI();
+        updateDateRangeLabels();
+        filterFiles();
+      }
+    }
+  });
+
   // Setup video player for annotation overlays
   setupVideoPlayer();
 }
@@ -63,7 +133,7 @@ function setupControls() {
 
 function filterFiles() {
   filteredFiles = [...allFiles];
-  
+
   // Filter out videos with person if requested
   if (filterPerson) {
     filteredFiles = filteredFiles.filter(file => {
@@ -74,21 +144,14 @@ function filterFiles() {
       return !file.objects.includes('person');
     });
   }
-  
+
   // Filter by empty videos if requested
   if (hideEmpty) {
-    filteredFiles = filteredFiles.filter(file => 
+    filteredFiles = filteredFiles.filter(file =>
       file.objects && file.objects.length > 0
     );
   }
-  
-  // Filter by object type if specified
-  if (objectFilter) {
-    filteredFiles = filteredFiles.filter(file => 
-      file.objects && file.objects.includes(objectFilter)
-    );
-  }
-  
+
   // Filter by day/night if specified
   if (timeFilter) {
     filteredFiles = filteredFiles.filter(file => {
@@ -100,7 +163,19 @@ function filterFiles() {
       return true; // 'day + night' or empty shows all
     });
   }
-  
+
+  // Filter by date range
+  if (minDate !== null && maxDate !== null) {
+    const dateRange = maxDate - minDate;
+    const minTimestamp = minDate + (dateRange * dateRangeMin / 100);
+    const maxTimestamp = minDate + (dateRange * dateRangeMax / 100);
+
+    filteredFiles = filteredFiles.filter(file => {
+      if (file.modified == null) return true;
+      return file.modified >= minTimestamp && file.modified <= maxTimestamp;
+    });
+  }
+
   updateVideoCount();
   sortAndRenderFiles();
 }
@@ -109,6 +184,41 @@ function updateVideoCount() {
   const count = filteredFiles.length;
   const videoCountElement = document.getElementById('video-count');
   videoCountElement.textContent = `${count} video${count !== 1 ? 's' : ''}`;
+}
+
+function updateDateRangeUI() {
+  const sliderRange = document.querySelector('.slider-range');
+  if (sliderRange) {
+    sliderRange.style.left = `${dateRangeMin}%`;
+    sliderRange.style.right = `${100 - dateRangeMax}%`;
+  }
+}
+
+function updateDateRangeLabels() {
+  if (minDate === null || maxDate === null) {
+    document.getElementById('date-range-min-label').textContent = '-';
+    document.getElementById('date-range-max-label').textContent = '-';
+    return;
+  }
+
+  const dateRange = maxDate - minDate;
+  const minTimestamp = minDate + (dateRange * dateRangeMin / 100);
+  const maxTimestamp = minDate + (dateRange * dateRangeMax / 100);
+
+  const minDateObj = new Date(minTimestamp * 1000);
+  const maxDateObj = new Date(maxTimestamp * 1000);
+
+  const formatDate = (date) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  document.getElementById('date-range-min-label').textContent = formatDate(minDateObj);
+  document.getElementById('date-range-max-label').textContent = formatDate(maxDateObj);
+
+  updateDateRangeUI();
 }
 
 function renderView() {

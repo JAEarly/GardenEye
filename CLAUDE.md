@@ -79,7 +79,7 @@ just test    # pytest with coverage
 - `frontend/static/index.html`: Single-page app
 - `frontend/static/app.js`: Application logic
 - `frontend/static/style.css`: Dark theme styles
-- Features: grid view, thumbnail previews, expandable player, annotation overlay, filters (object class, day/night, hide empty, exclude people), sorting (date/wildlife activity)
+- Features: grid view, thumbnail previews, expandable player, annotation overlay, date range slider, day/night filter, hide empty filter, exclude people filter, sorting (date/wildlife activity)
 
 ## Dependencies
 

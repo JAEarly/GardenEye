@@ -58,7 +58,7 @@ ignore = [
     "D413",  # missing-blank-line-after-last-section
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["D"]   # Ignore all pydocstyle rules in tests
 
 
