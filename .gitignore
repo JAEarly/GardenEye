@@ -31,3 +31,6 @@ Thumbs.db
 
 # Model weights
 weights/
+
+# Per machine config
+config.yaml
