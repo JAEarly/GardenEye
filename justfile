@@ -33,10 +33,10 @@ clean:
         cd $ws && just clean ; cd ../
     done
 
-# Install dependencies for backend (including optional ML dependencies)
+# Install dependencies for backend (including dev dependencies)
 install:
     @echo "Installing dependencies for backend..."
-    cd backend && uv sync --locked --all-extras --dev
+    cd backend && uv sync --locked
 
 # Run development server
 run:

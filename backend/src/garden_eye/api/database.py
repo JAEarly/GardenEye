@@ -66,6 +66,9 @@ def init_database(db_path: Path = DATABASE_PATH) -> SqliteDatabase:
 
     Args:
         db_path: Path to SQLite database file
+
+    Returns:
+        Configured and connected SqliteDatabase instance
     """
     logger.info(f"Initialising database with {db_path=}")
     db = SqliteDatabase(db_path)
@@ -77,6 +80,7 @@ def init_database(db_path: Path = DATABASE_PATH) -> SqliteDatabase:
     db.execute_sql("CREATE INDEX IF NOT EXISTS idx_annotation_video_frame ON annotation (video_file_id, frame_idx)")
     db.execute_sql("CREATE INDEX IF NOT EXISTS idx_annotation_video_name ON annotation (video_file_id, name)")
     db.execute_sql("CREATE INDEX IF NOT EXISTS idx_annotation_confidence ON annotation (confidence)")
+    logger.info(f"Loaded database with {len(VideoFile)} files")
     return db
 
 
@@ -87,6 +91,9 @@ def get_video_objects(video_file: VideoFile, filter_person: bool = False) -> lis
     Args:
         video_file: VideoFile instance to query
         filter_person: Whether to exclude videos containing only "person" annotations
+
+    Returns:
+        List of object names ordered by detection frequency
     """
     # Use SQL aggregation to count annotations by object name and sort by frequency
     objs = (
@@ -107,5 +114,8 @@ def get_thumbnail_path(video_file: VideoFile) -> Path:
 
     Args:
         video_file: VideoFile instance
+
+    Returns:
+        Path to the video's thumbnail image
     """
     return THUMBNAIL_DIR / f"{video_file.id}.jpg"

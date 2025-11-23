@@ -21,6 +21,9 @@ def _parse_range(range_header: str, file_size: int) -> tuple[int, int]:
     Args:
         range_header: HTTP Range header value
         file_size: Total file size in bytes
+
+    Returns:
+        Tuple of (start, end) byte positions inclusive
     """
     try:
         units, ranges = range_header.split("=", 1)
@@ -60,6 +63,9 @@ def range_file_response(file_path: Path, request: Request) -> Response:
     Args:
         file_path: Path to video file
         request: FastAPI Request object
+
+    Returns:
+        StreamingResponse with appropriate status code and headers
     """
     if not file_path.is_file():
         raise HTTPException(status_code=404, detail="File not found")
@@ -78,7 +84,7 @@ def range_file_response(file_path: Path, request: Request) -> Response:
                 bytes_left -= len(chunk)
                 yield chunk
 
-    if range_header:
+    if range_header is not None:
         start, end = _parse_range(range_header, file_size)
         content_length = end - start + 1
         headers = {
