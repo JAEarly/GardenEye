@@ -18,7 +18,7 @@ def test_config(tmp_path: Path) -> None:
 @pytest.fixture
 def test_db(tmp_path: Path) -> Generator[SqliteDatabase]:
     """Create an in-memory test database."""
-    # Local import to ensure config is patch first
+    # Lazy import to ensure config is patch first
     from garden_eye.api.database import init_database
 
     # Create a temporary database file for testing
