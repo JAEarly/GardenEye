@@ -28,15 +28,14 @@ A wildlife camera web viewer that uses AI to identify and annotate wildlife and 
 - [uv](https://github.com/astral-sh/uv) for package management
 - [just](https://github.com/casey/just) for task running
 - FFmpeg for video processing
-- External hard drive mounted at `/media/jearly/Seagate Expansion Drive` (configurable in `backend/src/garden_eye/__init__.py`)
 
 ### Setup
 ```bash
 # Install dependencies
 just install
 
-# Configure external drive path (if different from default)
-# Edit EXTERNAL_PATH in backend/src/garden_eye/__init__.py
+# Create config.yaml in project root AND edit it as required
+cp config.yaml.example config.yaml
 
 # Start development server
 just run
@@ -46,8 +45,8 @@ Visit http://localhost:8000 to view the application.
 
 ### Processing Videos
 ```bash
-# Place your .MP4 files in the external drive directory:
-# /media/jearly/Seagate Expansion Drive/gardeneye/raw/
+# Place your .MP4 files in your data directory's raw/ folder
+# (as configured in config.yaml, e.g., /path/to/gardeneye/raw/)
 
 # Run full data ingestion pipeline: file discovery, AI object detection,
 # wildlife proportion calculation, thumbnail generation, and day/night classification
@@ -86,10 +85,10 @@ just clean
 
 ### Technology Stack
 - **Backend (garden-eye)**:
-  - Core: FastAPI, Peewee ORM, SQLite, uvicorn, httpx, tqdm
+  - Core: FastAPI, Peewee ORM, SQLite, uvicorn, httpx, tqdm, PyYAML
   - Dev/ML: OpenCV, YOLO (Ultralytics), matplotlib, Pillow, PyTorch
   - Testing: pytest, pytest-cov, pytest-asyncio
-  - Type checking: mypy with strict mode
+  - Type checking: mypy with strict mode, types-pyyaml
   - Linting: ruff (with bandit security rules)
 - **Build & Automation**: uv (package manager), just (task runner)
 - **CI/CD**: GitHub Actions, Renovate
@@ -101,6 +100,7 @@ just clean
 │   ├── src/
 │   │   └── garden_eye/   # Core application package
 │   │       ├── __init__.py   # Path configuration
+│   │       ├── config.py     # YAML configuration loader
 │   │       ├── api/          # FastAPI application
 │   │       │   ├── main.py       # API endpoints and app setup
 │   │       │   ├── database.py   # Peewee ORM models (VideoFile, Annotation)
@@ -122,8 +122,9 @@ just clean
 │       ├── app.js        # JavaScript application
 │       └── images/       # Logo and branding assets
 ├── weights/               # YOLO model weights (gitignored)
-└── External Drive         # Data stored on external drive (not in repo)
-    └── /media/jearly/Seagate Expansion Drive/gardeneye/
+├── config.yaml            # Per-machine configuration (gitignored)
+└── Data Directory         # Configured via config.yaml (not in repo)
+    └── (e.g., /path/to/gardeneye/)
         ├── database.db    # SQLite database
         ├── thumbnails/    # Generated thumbnail images
         └── raw/           # Source video files
