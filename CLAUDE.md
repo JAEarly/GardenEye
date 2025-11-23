@@ -24,7 +24,7 @@ just run        # Start dev server (http://localhost:8000)
 # Configure external drive (edit EXTERNAL_PATH in backend/src/garden_eye/__init__.py if needed)
 # Place videos in: /media/jearly/Seagate Expansion Drive/gardeneye/raw/
 # Process videos (requires dev dependencies)
-cd backend && uv run python -m garden_eye.scripts.ingest_data
+cd backend && uv run python scripts/ingest_data.py
 ```
 
 ## Development Commands
@@ -54,10 +54,10 @@ just test    # pytest with coverage
 - `src/garden_eye/api/range_stream.py`: HTTP range requests for video streaming
 - `src/garden_eye/helpers.py`: `WILDLIFE_COCO_LABELS`, `is_night_video()`, `is_target_coco_annotation()`
 - `src/garden_eye/log.py`: Logging config
-- `src/scripts/ingest_data.py`: YOLO detection + thumbnails + wildlife proportion + day/night classification
-- `src/scripts/day_vs_night.py`: 3D RGB visualization
-- `src/scripts/analyse_distribution.py`: Animated pie charts
-- `src/scripts/annotation_prop.py`: Wildlife proportion histogram
+- `scripts/ingest_data.py`: YOLO detection + thumbnails + wildlife proportion + day/night classification
+- `scripts/day_vs_night.py`: 3D RGB visualization
+- `scripts/analyse_distribution.py`: Animated pie charts
+- `scripts/annotation_prop.py`: Wildlife proportion histogram
 - `tests/`: 90%+ coverage test suite
 
 **Data Storage:** External drive at `/media/jearly/Seagate Expansion Drive/gardeneye/`
