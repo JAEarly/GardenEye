@@ -41,7 +41,9 @@ install:
 # Run development server
 run:
     @echo "Starting development server..."
-    cd backend && uv run python -m uvicorn garden_eye.api.main:app --reload \
+    cd backend && uv run python -m uvicorn garden_eye.api.main:app \
+      --host 0.0.0.0 \
+      --reload \
       --reload-dir src \
       --reload-dir ../frontend
 
