@@ -7,16 +7,29 @@ from garden_eye.log import get_logger
 
 logger = get_logger(__file__)
 
-config = Config.load()
-print(config)
 
-# Local disk
-BASE_DIR = Path(__file__).resolve().parents[3]
-WEIGHTS_DIR = BASE_DIR / "weights"
-STATIC_ROOT = BASE_DIR / "frontend" / "static"
+from functools import cache
 
-if not config.data_root.exists():
-    logger.warning(f"Data directory not found at {config.data_root}")
-RAW_DATA_DIR = config.data_root / "raw"
+
+@cache
+def config() -> Config:
+    return Config.load()
+
+
+@cache
+def raw_dir() -> Path:
+    return config().data_root / "raw"
+
+
+@cache
+def weights_dir() -> Path:
+    return Path(__file__).resolve().parents[3] / "weights"
+
+
+@cache
+def static_root() -> Path:
+    return Path(__file__).resolve().parents[3] / "frontend" / "static"
+
+
 THUMBNAIL_DIR = config.data_root / "thumbnails"
 DATABASE_PATH = config.data_root / "database.db"
