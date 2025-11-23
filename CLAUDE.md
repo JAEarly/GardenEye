@@ -21,8 +21,8 @@ Target wildlife objects: person, bird, cat, dog, horse, sheep, cow, elephant, be
 just install    # Install dependencies
 just run        # Start dev server (http://localhost:8000)
 
-# Configure external drive (edit EXTERNAL_PATH in backend/src/garden_eye/__init__.py if needed)
-# Place videos in: /media/jearly/Seagate Expansion Drive/gardeneye/raw/
+# Create config.yaml in project root: data_root: /path/to/gardeneye
+# Place videos in: {data_root}/raw/
 # Process videos (requires dev dependencies)
 cd backend && uv run python scripts/ingest_data.py
 ```
@@ -48,7 +48,8 @@ just test    # pytest with coverage
 ## Architecture
 
 ### Backend (`garden-eye`)
-- `src/garden_eye/__init__.py`: Path configuration (including external drive setup)
+- `src/garden_eye/__init__.py`: Path configuration
+- `src/garden_eye/config.py`: YAML config loader (`data_root`)
 - `src/garden_eye/api/main.py`: FastAPI endpoints
 - `src/garden_eye/api/database.py`: Peewee ORM (`VideoFile`, `Annotation` models)
 - `src/garden_eye/api/range_stream.py`: HTTP range requests for video streaming
@@ -60,18 +61,18 @@ just test    # pytest with coverage
 - `scripts/annotation_prop.py`: Wildlife proportion histogram
 - `tests/`: 90%+ coverage test suite
 
-**Data Storage:** External drive at `/media/jearly/Seagate Expansion Drive/gardeneye/`
-- Database: `database.db`
-- Raw videos: `raw/**/*.MP4`
-- Thumbnails: `thumbnails/`
+**Data Storage:** Configured via `config.yaml` (`data_root`)
+- Database: `{data_root}/database.db`
+- Raw videos: `{data_root}/raw/**/*.MP4`
+- Thumbnails: `{data_root}/thumbnails/`
 
 **YOLO weights:** Local `weights/` directory
 
 ### Video Processing Pipeline
-1. Videos in external drive `raw/` directory discovered by ingestion script
+1. Videos in `{data_root}/raw/` directory discovered by ingestion script
 2. `VideoFile` stores path, size, mtime, annotation status, `wildlife_prop`, `is_night`
 3. YOLO detection stores target wildlife/people annotations in `Annotation` model
-4. FFmpeg generates thumbnails to external drive `thumbnails/` directory
+4. FFmpeg generates thumbnails to `{data_root}/thumbnails/` directory
 5. Script calculates `wildlife_prop` (frames with wildlife / total frames)
 6. RGB analysis classifies day/night videos via `is_night_video()`
 
@@ -93,17 +94,17 @@ just test    # pytest with coverage
 **Package manager:** uv
 **Task runner:** just
 
-**Backend core:** FastAPI, Peewee, uvicorn, httpx, tqdm
+**Backend core:** FastAPI, Peewee, uvicorn, httpx, tqdm, PyYAML
 **Dev/ML:** OpenCV, YOLO (Ultralytics), matplotlib, Pillow, PyTorch
 **Testing:** pytest, pytest-cov, pytest-asyncio
-**Quality:** mypy (strict), ruff (including bandit security rules)
+**Quality:** mypy (strict), ruff (including bandit security rules), types-pyyaml
 
 ## Code Quality
 
 - Test naming: `test__<thing>__<outcome>`
 - All test functions: `-> None` return type
 - Coverage threshold: 90%+
-- Docstrings: Google-style, imperative mood, no default values
+- Docstrings: Google-style, imperative mood, no default values (module docstrings optional per D100)
 - Security: No `shell=True`, use `shutil.which()` for executables
 - Type annotations: Required (mypy strict mode)
 - Line length: 120 characters

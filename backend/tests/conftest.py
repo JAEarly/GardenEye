@@ -1,16 +1,27 @@
 import tempfile
 from collections.abc import Generator
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from peewee import SqliteDatabase
 
-from garden_eye.api.database import init_database
+from garden_eye.config import Config
+
+
+@pytest.fixture(autouse=True)
+def test_config(tmp_path: Path) -> Generator[None]:
+    config = Config(data_root=tmp_path)
+    with patch("garden_eye.config.Config.load", return_value=config):
+        yield
 
 
 @pytest.fixture
 def test_db(tmp_path: Path) -> Generator[SqliteDatabase]:
     """Create an in-memory test database."""
+    # Lazy import to ensure config is patch first
+    from garden_eye.api.database import init_database
+
     # Create a temporary database file for testing
     test_db_path = tmp_path / "test.db"
     try:

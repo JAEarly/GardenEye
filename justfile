@@ -43,8 +43,7 @@ run:
     @echo "Starting development server..."
     cd backend && uv run python -m uvicorn garden_eye.api.main:app --reload \
       --reload-dir src \
-      --reload-dir ../frontend \
-      --reload-dir ../data
+      --reload-dir ../frontend
 
 # Show help
 help:
