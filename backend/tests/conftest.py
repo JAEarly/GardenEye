@@ -10,9 +10,10 @@ from garden_eye.config import Config
 
 
 @pytest.fixture(autouse=True)
-def test_config(tmp_path: Path) -> None:
+def test_config(tmp_path: Path) -> Generator[None]:
     config = Config(data_root=tmp_path)
-    patch("garden_eye.config.Config.load", side_effect=config)
+    with patch("garden_eye.config.Config.load", return_value=config):
+        yield
 
 
 @pytest.fixture
