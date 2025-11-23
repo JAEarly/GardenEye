@@ -1,11 +1,19 @@
 import tempfile
 from collections.abc import Generator
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from peewee import SqliteDatabase
 
 from garden_eye.api.database import init_database
+from garden_eye.config import Config
+
+
+@pytest.fixture(autouse=True)
+def test_config(tmp_path: Path) -> None:
+    config = Config(data_root=tmp_path)
+    patch("garden_eye.config.Config.load", side_effect=config)
 
 
 @pytest.fixture

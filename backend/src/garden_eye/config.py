@@ -9,17 +9,14 @@ CONFIG_PATH = Path(__file__).parents[3] / "config.yaml"
 
 
 @dataclass(frozen=True)
-class _Config:
+class Config:
     """One-to-one mapping with config.yaml."""
 
     data_root: Path
 
     @staticmethod
-    def load() -> _Config:
+    def load() -> Config:
         """Load the config from disk."""
         with open(CONFIG_PATH) as f:
             raw_config = yaml.safe_load(f)
-        return _Config(data_root=Path(raw_config["data_root"]))
-
-
-config = _Config.load()
+        return Config(data_root=Path(raw_config["data_root"]))
