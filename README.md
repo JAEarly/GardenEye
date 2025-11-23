@@ -51,7 +51,7 @@ Visit http://localhost:8000 to view the application.
 
 # Run full data ingestion pipeline: file discovery, AI object detection,
 # wildlife proportion calculation, thumbnail generation, and day/night classification
-cd backend && uv run python -m garden_eye.scripts.ingest_data
+cd backend && uv run python scripts/ingest_data.py
 ```
 
 ## Development
@@ -99,19 +99,19 @@ just clean
 ```
 ├── backend/               # FastAPI backend (garden-eye package)
 │   ├── src/
-│   │   ├── garden_eye/   # Core application package
-│   │   │   ├── __init__.py   # Path configuration
-│   │   │   ├── api/          # FastAPI application
-│   │   │   │   ├── main.py       # API endpoints and app setup
-│   │   │   │   ├── database.py   # Peewee ORM models (VideoFile, Annotation)
-│   │   │   │   └── range_stream.py # HTTP range request handling
-│   │   │   ├── log.py        # Logging configuration
-│   │   │   └── helpers.py    # Wildlife labels and day/night detection
-│   │   └── scripts/      # Analysis and processing scripts
-│   │       ├── ingest_data.py # Data ingestion pipeline (detection, thumbnails, classification)
-│   │       ├── day_vs_night.py # 3D RGB distribution visualization
-│   │       ├── analyse_distribution.py # Animated pie chart for distributions
-│   │       └── annotation_prop.py # Wildlife proportion histogram
+│   │   └── garden_eye/   # Core application package
+│   │       ├── __init__.py   # Path configuration
+│   │       ├── api/          # FastAPI application
+│   │       │   ├── main.py       # API endpoints and app setup
+│   │       │   ├── database.py   # Peewee ORM models (VideoFile, Annotation)
+│   │       │   └── range_stream.py # HTTP range request handling
+│   │       ├── log.py        # Logging configuration
+│   │       └── helpers.py    # Wildlife labels and day/night detection
+│   ├── scripts/          # Analysis and processing scripts
+│   │   ├── ingest_data.py # Data ingestion pipeline (detection, thumbnails, classification)
+│   │   ├── day_vs_night.py # 3D RGB distribution visualization
+│   │   ├── analyse_distribution.py # Animated pie chart for distributions
+│   │   └── annotation_prop.py # Wildlife proportion histogram
 │   ├── tests/            # Test suite (90%+ coverage)
 │   ├── pyproject.toml    # Package config and dependencies
 │   └── justfile          # Backend task automation
