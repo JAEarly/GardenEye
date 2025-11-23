@@ -10,6 +10,9 @@ def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
     Args:
         name: Logger name, typically module name
         level: Logging level
+
+    Returns:
+        Configured logger instance with standardized formatting
     """
     logger = logging.getLogger(name)
     logger.setLevel(level)

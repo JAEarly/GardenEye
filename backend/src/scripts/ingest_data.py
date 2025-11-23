@@ -10,7 +10,7 @@ from peewee import chunked
 from tqdm import tqdm
 from ultralytics import YOLO
 
-from garden_eye import WEIGHTS_DIR, RAW_DATA_DIR
+from garden_eye import RAW_DATA_DIR, WEIGHTS_DIR
 from garden_eye.api.database import Annotation, VideoFile, get_thumbnail_path, init_database
 from garden_eye.helpers import is_night_video, is_target_coco_annotation
 from garden_eye.log import get_logger

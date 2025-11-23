@@ -28,11 +28,15 @@ A wildlife camera web viewer that uses AI to identify and annotate wildlife and 
 - [uv](https://github.com/astral-sh/uv) for package management
 - [just](https://github.com/casey/just) for task running
 - FFmpeg for video processing
+- External hard drive mounted at `/media/jearly/Seagate Expansion Drive` (configurable in `backend/src/garden_eye/__init__.py`)
 
 ### Setup
 ```bash
 # Install dependencies
 just install
+
+# Configure external drive path (if different from default)
+# Edit EXTERNAL_PATH in backend/src/garden_eye/__init__.py
 
 # Start development server
 just run
@@ -42,7 +46,9 @@ Visit http://localhost:8000 to view the application.
 
 ### Processing Videos
 ```bash
-# Place your .MP4 files in the data/ directory
+# Place your .MP4 files in the external drive directory:
+# /media/jearly/Seagate Expansion Drive/gardeneye/raw/
+
 # Run full data ingestion pipeline: file discovery, AI object detection,
 # wildlife proportion calculation, thumbnail generation, and day/night classification
 cd backend && uv run python -m garden_eye.scripts.ingest_data
@@ -115,11 +121,13 @@ just clean
 │       ├── style.css     # Stylesheet
 │       ├── app.js        # JavaScript application
 │       └── images/       # Logo and branding assets
-├── data/                  # Video files and SQLite database (gitignored)
-│   ├── database.db       # SQLite database
-│   ├── thumbnails/       # Generated thumbnail images
-│   └── **/*.MP4          # Video files (organized by date/folder structure)
 ├── weights/               # YOLO model weights (gitignored)
+└── External Drive         # Data stored on external drive (not in repo)
+    └── /media/jearly/Seagate Expansion Drive/gardeneye/
+        ├── database.db    # SQLite database
+        ├── thumbnails/    # Generated thumbnail images
+        └── raw/           # Source video files
+            └── **/*.MP4   # Video files (organized by date/folder structure)
 ├── .github/
 │   ├── workflows/        # CI/CD (lint and test jobs)
 │   └── renovate.json     # Dependency automation

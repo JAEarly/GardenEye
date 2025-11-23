@@ -31,6 +31,9 @@ def is_target_coco_annotation(label: str) -> bool:
 
     Args:
         label: COCO annotation label name
+
+    Returns:
+        True if label is a target wildlife or person category
     """
     return label in WILDLIFE_COCO_LABELS.values()
 

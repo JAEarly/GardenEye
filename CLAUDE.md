@@ -21,6 +21,8 @@ Target wildlife objects: person, bird, cat, dog, horse, sheep, cow, elephant, be
 just install    # Install dependencies
 just run        # Start dev server (http://localhost:8000)
 
+# Configure external drive (edit EXTERNAL_PATH in backend/src/garden_eye/__init__.py if needed)
+# Place videos in: /media/jearly/Seagate Expansion Drive/gardeneye/raw/
 # Process videos (requires dev dependencies)
 cd backend && uv run python -m garden_eye.scripts.ingest_data
 ```
@@ -46,6 +48,7 @@ just test    # pytest with coverage
 ## Architecture
 
 ### Backend (`garden-eye`)
+- `src/garden_eye/__init__.py`: Path configuration (including external drive setup)
 - `src/garden_eye/api/main.py`: FastAPI endpoints
 - `src/garden_eye/api/database.py`: Peewee ORM (`VideoFile`, `Annotation` models)
 - `src/garden_eye/api/range_stream.py`: HTTP range requests for video streaming
@@ -57,14 +60,18 @@ just test    # pytest with coverage
 - `src/scripts/annotation_prop.py`: Wildlife proportion histogram
 - `tests/`: 90%+ coverage test suite
 
-**Database:** SQLite at `data/database.db`
-**YOLO weights:** `weights/` directory
+**Data Storage:** External drive at `/media/jearly/Seagate Expansion Drive/gardeneye/`
+- Database: `database.db`
+- Raw videos: `raw/**/*.MP4`
+- Thumbnails: `thumbnails/`
+
+**YOLO weights:** Local `weights/` directory
 
 ### Video Processing Pipeline
-1. Videos in `data/` discovered by ingestion script
+1. Videos in external drive `raw/` directory discovered by ingestion script
 2. `VideoFile` stores path, size, mtime, annotation status, `wildlife_prop`, `is_night`
 3. YOLO detection stores target wildlife/people annotations in `Annotation` model
-4. FFmpeg generates thumbnails at `data/thumbnails/`
+4. FFmpeg generates thumbnails to external drive `thumbnails/` directory
 5. Script calculates `wildlife_prop` (frames with wildlife / total frames)
 6. RGB analysis classifies day/night videos via `is_night_video()`
 
