@@ -78,7 +78,7 @@ def range_file_response(file_path: Path, request: Request) -> Response:
                 bytes_left -= len(chunk)
                 yield chunk
 
-    if range_header:
+    if range_header is not None:
         start, end = _parse_range(range_header, file_size)
         content_length = end - start + 1
         headers = {

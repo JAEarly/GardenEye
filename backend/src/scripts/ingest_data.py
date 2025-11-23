@@ -10,7 +10,7 @@ from peewee import chunked
 from tqdm import tqdm
 from ultralytics import YOLO
 
-from garden_eye import DATA_DIR, WEIGHTS_DIR
+from garden_eye import WEIGHTS_DIR, RAW_DATA_DIR
 from garden_eye.api.database import Annotation, VideoFile, get_thumbnail_path, init_database
 from garden_eye.helpers import is_night_video, is_target_coco_annotation
 from garden_eye.log import get_logger
@@ -39,7 +39,7 @@ def add_files() -> None:
     """Discover and add new video files from data directory to database."""
     logger.info("Adding files...")
     data = []
-    for path in DATA_DIR.glob("**/*.MP4"):
+    for path in RAW_DATA_DIR.glob("**/*.MP4"):
         st = path.stat()
         data.append({"path": path, "size": st.st_size, "modified": st.st_mtime})
     result = VideoFile.insert_many(data).on_conflict_ignore().execute()

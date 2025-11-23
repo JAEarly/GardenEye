@@ -77,6 +77,7 @@ def init_database(db_path: Path = DATABASE_PATH) -> SqliteDatabase:
     db.execute_sql("CREATE INDEX IF NOT EXISTS idx_annotation_video_frame ON annotation (video_file_id, frame_idx)")
     db.execute_sql("CREATE INDEX IF NOT EXISTS idx_annotation_video_name ON annotation (video_file_id, name)")
     db.execute_sql("CREATE INDEX IF NOT EXISTS idx_annotation_confidence ON annotation (confidence)")
+    logger.info(f"Loaded database with {len(VideoFile)} files")
     return db
 
 
