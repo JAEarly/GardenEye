@@ -67,6 +67,6 @@ jobs:
       - name: Setup venv
         run: uv sync --locked --all-extras --dev
       - name: Create mock config
-        run: cp config.yaml.example config.yaml
+        run: cp ../config.yaml.example ../config.yaml
       - name: Run tests
         run: just test
