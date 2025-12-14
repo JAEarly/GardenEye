@@ -13,7 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from starlette.responses import Response
 
-from garden_eye import static_root
+from garden_eye import STATIC_ROOT
 from garden_eye.api.database import (
     Annotation,
     VideoFile,
@@ -77,13 +77,13 @@ app.add_middleware(
 )
 
 # Mount static files directory
-app.mount("/static", StaticFiles(directory=static_root()), name="static")
+app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
 
 
 @app.get("/")
 def index() -> FileResponse:
     """Serve the frontend HTML application."""
-    index_path = static_root() / "index.html"
+    index_path = STATIC_ROOT / "index.html"
     if not index_path.is_file():
         raise HTTPException(500, detail="Missing static/index.html")
     return FileResponse(index_path)

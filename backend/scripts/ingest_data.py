@@ -10,14 +10,14 @@ from peewee import chunked
 from tqdm import tqdm
 from ultralytics import YOLO
 
-from garden_eye import raw_dir, weights_dir
+from garden_eye import RAW_DIR, WEIGHTS_DIR
 from garden_eye.api.database import Annotation, VideoFile, get_thumbnail_path, init_database
 from garden_eye.helpers import is_night_video, is_target_coco_annotation
 from garden_eye.log import get_logger
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 MODEL_NAME = "yolo11m.pt"
-MODEL = YOLO(weights_dir() / MODEL_NAME)
+MODEL = YOLO(WEIGHTS_DIR / MODEL_NAME)
 
 
 logger = get_logger(__name__)
@@ -39,7 +39,7 @@ def add_files() -> None:
     """Discover and add new video files from data directory to database."""
     logger.info("Adding files...")
     data = []
-    for path in raw_dir().glob("**/*.MP4"):
+    for path in RAW_DIR.glob("**/*.MP4"):
         st = path.stat()
         data.append({"path": path, "size": st.st_size, "modified": st.st_mtime})
     result = VideoFile.insert_many(data).on_conflict_ignore().execute()

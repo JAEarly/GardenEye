@@ -15,7 +15,7 @@ from peewee import (
     fn,
 )
 
-from garden_eye import database_path, thumbnail_dir
+from garden_eye import DATABASE_PATH, THUMBNAIL_DIR
 from garden_eye.helpers import is_target_coco_annotation
 from garden_eye.log import get_logger
 
@@ -60,7 +60,7 @@ class Annotation(Model):
     y2 = FloatField()
 
 
-def init_database(db_path: Path | None = None) -> SqliteDatabase:
+def init_database(db_path: Path = DATABASE_PATH) -> SqliteDatabase:
     """
     Initialize and configure the SQLite database.
 
@@ -70,8 +70,6 @@ def init_database(db_path: Path | None = None) -> SqliteDatabase:
     Returns:
         Configured and connected SqliteDatabase instance
     """
-    if db_path is None:
-        db_path = database_path()
     logger.info(f"Initialising database with {db_path=}")
     db = SqliteDatabase(db_path)
     db.connect()
@@ -120,4 +118,4 @@ def get_thumbnail_path(video_file: VideoFile) -> Path:
     Returns:
         Path to the video's thumbnail image
     """
-    return thumbnail_dir() / f"{video_file.id}.jpg"
+    return THUMBNAIL_DIR / f"{video_file.id}.jpg"
