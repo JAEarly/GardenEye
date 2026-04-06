@@ -24,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Install just
-        uses: extractions/setup-just@v3
+        uses: extractions/setup-just@v4
         with:
           just-version: '1.26.0'
       - name: Install python
@@ -51,7 +51,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Install just
-        uses: extractions/setup-just@v3
+        uses: extractions/setup-just@v4
         with:
           just-version: '1.26.0'
       - name: Install python
